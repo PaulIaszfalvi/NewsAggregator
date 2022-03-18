@@ -1,0 +1,20 @@
+{
+  "name": "news-aggregator",
+  "version": "1.0.0",
+  "description": "News Aggregator",
+  "main": "backend/server.js",
+  "scripts": {
+    "frontend-install": "cd frontend && npm install",
+    "start": "node backend/server.js",
+    "server": "nodemon server.js",
+    "frontend": "npm start --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run frontend\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paul Iaszfalvi",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^3.5.1",
+    "express": "^4.17.3"
+  }
+}
