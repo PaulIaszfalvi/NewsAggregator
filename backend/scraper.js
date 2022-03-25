@@ -1,10 +1,32 @@
 const reddit = require("./templates/reddit");
 
 (async () => {
-  await reddit.initialize("learnprogramming");
+  //Get the links
+  const myList = getList();
 
-  let result = await reddit.getResults(10);
+  // -1 because I can only scan reddit right now
+  for (var i = 0; i < myList.links.length - 1; i++) {
+    console.log(myList.links[i].main);
+    for (var j = 0; j < myList.links[i].subs.length; j++) {
+      //console.log(myList.links[i].subs[j]);
+
+      const subSite = myList.links[i].subs[j];
+
+      console.log("\n" + subSite + "\n");
+      await reddit.initialize(subSite);
+
+      let result = await reddit.getResults(10);
+
+      console.log(result);
+    }
+  }
 })();
+
+function getList() {
+  var json = require("./textFiles/links.json");
+
+  return json;
+}
 
 // const puppeteer = require("puppeteer");
 

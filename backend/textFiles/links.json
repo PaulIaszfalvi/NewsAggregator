@@ -1,0 +1,12 @@
+{
+  "links": [
+    {
+      "main": "https://wwww.reddit.com/r/",
+      "subs": ["learnprogramming", "programminghumor", "cscareerquestions"]
+    },
+    {
+      "main": "https://news.ycombinator.com",
+      "subs": [""]
+    }
+  ]
+}
