@@ -1,12 +1,19 @@
 {
   "links": [
     {
-      "main": "https://wwww.reddit.com/r/",
-      "subs": ["learnprogramming", "programminghumor", "cscareerquestions"]
-    },
-    {
+      "title": "ycombinator",
       "main": "https://news.ycombinator.com",
       "subs": [""]
+    },
+    {
+      "title": "reddit",
+      "main": "https://wwww.reddit.com/r/",
+      "subs": [
+        "learnprogramming",
+        "programminghumor",
+        "cscareerquestions",
+        "programming"
+      ]
     }
   ]
 }

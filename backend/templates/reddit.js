@@ -1,11 +1,14 @@
 const puppeteer = require("puppeteer");
 
-const SUBREDDIT_URL = (reddit) => `https://old.reddit.com/r/${reddit}/`;
+let SUBREDDIT_URL = (reddit) => `https://old.reddit.com/r/${reddit}/`;
 
 const self = {
   browser: null,
   page: null,
 
+  // setURL: async (mainURL) => {
+  //   SUBREDDIT_URL = mainURL;
+  // },
   //get url and make a call
   initialize: async (reddit) => {
     self.browser = await puppeteer.launch({
@@ -13,32 +16,30 @@ const self = {
     });
     self.page = await self.browser.newPage();
 
-    await self.page.goto(SUBREDDIT_URL(reddit), { waitUntil: "networkidle0" });
+    await self.page.goto(SUBREDDIT_URL(reddit) + ".json", {
+      waitUntil: "networkidle0",
+    });
   },
 
   getResults: async (nr) => {
-    let data = await this.page.evaluate(() => {
-      let user = document.querySelector('a[data-click-id="user"]').innerText;
-    });
+    let elements = await self.page.$eval("*", (el) => el.innerText);
+    let myArray = [];
 
-    //let elements = await self.page.$$('#siteTable > div[class*="thing"]');
+    let myParsedJson = JSON.parse(elements);
 
-    var myArray = [];
+    for (let i = 0; i < nr; i++) {
+      let title = myParsedJson.data.children[i].data.title;
+      let user = myParsedJson.data.children[i].data.author;
+      let score = myParsedJson.data.children[i].data.score;
+      let selftext = myParsedJson.data.children[i].data.selftext;
 
-    for (let element of elements) {
-      // let title = await element.$eval('p[class="title"]', (node) =>
-      //   node.innerText.trim()
-      // );
-      let title = await element.$eval("a", (node) => node.innerText);
-      let user = await element.$eval('a[data-click-id="user"]', (node) =>
-        node.innterText.trim()
-      );
-      //let likes = await element.$eval("p", (node) => node.innterText);
+      if (selftext === "") {
+        selftext = myParsedJson.data.children[i].data.url;
+      }
 
-      let tempArray = [title, user];
-
-      myArray.push(tempArray);
+      myArray.push([title, user, score, selftext]);
     }
+
     return myArray;
   },
 };
