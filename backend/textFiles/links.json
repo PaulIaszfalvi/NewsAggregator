@@ -1,11 +1,6 @@
 {
   "links": [
     {
-      "title": "ycombinator",
-      "main": "https://news.ycombinator.com",
-      "subs": [""]
-    },
-    {
       "title": "reddit",
       "main": "https://wwww.reddit.com/r/",
       "subs": [
@@ -14,6 +9,11 @@
         "cscareerquestions",
         "programming"
       ]
+    },
+    {
+      "title": "ycombinator",
+      "main": "https://news.ycombinator.com",
+      "subs": [""]
     }
   ]
 }

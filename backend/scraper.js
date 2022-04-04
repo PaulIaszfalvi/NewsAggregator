@@ -4,39 +4,41 @@ const ycombinator = require("./templates/ycombinator");
 (async () => {
   //Get the links
   const myList = getList();
-
+  let resultsArray = [];
   // -1 because I can only scan reddit right now
-  for (var i = 0; i < myList.links.length - 1; i++) {
+  // First for loop goes through links, second for loop goes through subs
+  for (var i = 0; i < myList.links.length; i++) {
     var title = myList.links[i].title;
 
+    console.log(title);
+
+    // Determine which template to use based on which site will be scraped
     switch (title) {
       case "reddit":
         myTemplate = reddit;
+        break;
       case "ycombinator":
         myTemplate = ycombinator;
-      // default:
-      //   console.log("Error choosing template");
-      //   break;
-
-      // await myTemplate.setURL(myList.links[i].main);
+        break;
+      default:
+        console.log("This should not happen");
+        break;
     }
 
     for (var j = 0; j < myList.links[i].subs.length; j++) {
-      //console.log(myList.links[i].subs[j]);
-
       const subSite = myList.links[i].subs[j];
 
-      console.log("\n" + subSite + "\n");
-
       await myTemplate.initialize(subSite);
-
       let result = await myTemplate.getResults(5);
 
-      console.log(result);
+      resultsArray.push(title, result);
     }
   }
+  console.log(resultsArray);
+  exports.resultsArray;
 })();
 
+//Get a list (json format) with the titles, links, and subs for the websites that will be scraped
 function getList() {
   var json = require("./textFiles/links.json");
 

@@ -24,20 +24,18 @@ const self = {
   getResults: async (nr) => {
     const titles = await self.page.$$(".titlelink");
     const users = await self.page.$$(".subtext");
+    let resultsArray = [];
 
-    for (let i = 0; i < titles.length; i++) {
+    for (let i = 0; i < nr; i++) {
       let title = await (await titles[i].getProperty("innerText")).jsonValue();
       let link = await (await titles[i].getProperty("href")).jsonValue();
 
       let user = await (await users[i].getProperty("innerText")).jsonValue();
 
-      console.log(title, "\n", link, user);
+      resultsArray.push([title, link, user]);
     }
 
-    // for (var i = 0; i < 1; i++) {
-    //   console.log(titles[i]);
-    //   console.log(users[i]);
-    // }
+    return resultsArray;
   },
 };
 
