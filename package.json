@@ -6,7 +6,6 @@
   "scripts": {
     "frontend-install": "cd frontend && npm install",
     "backend": "node backend/server.js",
-  
     "frontend": "npm start --prefix frontend",
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,6 +16,7 @@
     "concurrently": "^3.5.1",
     "express": "^4.17.3",
     "nodemon": "^2.0.15",
-    "puppeteer": "^13.5.1"
+    "puppeteer": "^13.5.1",
+    "serve-favicon": "^2.5.0"
   }
 }

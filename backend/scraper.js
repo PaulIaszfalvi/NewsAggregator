@@ -10,7 +10,7 @@ const ycombinator = require("./templates/ycombinator");
   for (var i = 0; i < myList.links.length; i++) {
     var title = myList.links[i].title;
 
-    console.log(title);
+    //console.log(title);
 
     // Determine which template to use based on which site will be scraped
     switch (title) {
@@ -34,7 +34,7 @@ const ycombinator = require("./templates/ycombinator");
       resultsArray.push(title, result);
     }
   }
-  console.log(resultsArray);
+  //console.log(resultsArray);
   exports.resultsArray;
 })();
 
