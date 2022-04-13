@@ -1,7 +1,7 @@
 const reddit = require("./templates/reddit");
 const ycombinator = require("./templates/ycombinator");
 
-(async () => {
+const scraper = (async () => {
   //Get the links
   const myList = getList();
   let resultsArray = [];
@@ -29,13 +29,14 @@ const ycombinator = require("./templates/ycombinator");
       const subSite = myList.links[i].subs[j];
 
       await myTemplate.initialize(subSite);
-      let result = await myTemplate.getResults(5);
+      let result = await myTemplate.getResults(1);
 
       resultsArray.push(title, result);
     }
   }
-  //console.log(resultsArray);
-  exports.resultsArray;
+  let stringArray = JSON.stringify(resultsArray);
+  //console.log(stringArray, new Date().getTime());
+  return resultsArray;
 })();
 
 //Get a list (json format) with the titles, links, and subs for the websites that will be scraped
@@ -44,3 +45,5 @@ function getList() {
 
   return json;
 }
+
+module.exports = scraper;

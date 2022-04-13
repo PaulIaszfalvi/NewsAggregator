@@ -6,32 +6,28 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 var favicon = require("serve-favicon");
 var path = require("path");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
-app.use(favicon(path.join(__dirname, "../frontend/public/favicon.ico")));
+// Configuring express to use body-parser as middle-ware.
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors());
+//fetch(request, { mode: "cors" });
 
-// app.use(app.router);
-// routes.initialize(app);
-app.get("/", (req, res) => {
-  res.send(scraper);
-  //res.send("This is your data.");
+app.use(favicon(path.join(__dirname, "../frontend/public/network.png")));
+
+app.get("/", async (req, res) => {
+  console.log(await scraper); //, new Date().getTime());
+  res.send(await scraper);
 });
 
-app.get("/", (req, res) => {
-  res.json({
-    name: "Paul",
-    age: 37,
-  });
-  //res.send("This is your data.");
-});
-
-//app.use("/", require("./hello"));
-
-// app.get("/api", (req, res) => {
-//   res.json({ message: "Hello from server!" });
-// });
-
-// app.listen(PORT, () => {
-//   console.log(`Server listening on ${PORT}`);
+// app.get("/", (req, res) => {
+//   res.json({
+//     name: "Paul",
+//     age: 37,
+//   });
+//   //res.send("This is your data.");
 // });
 
 app.listen(PORT, () => {
