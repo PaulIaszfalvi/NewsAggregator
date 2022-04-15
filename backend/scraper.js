@@ -5,6 +5,7 @@ const scraper = (async () => {
   //Get the links
   const myList = getList();
   let resultsArray = [];
+  let numResults = 10;
   // -1 because I can only scan reddit right now
   // First for loop goes through links, second for loop goes through subs
   for (var i = 0; i < myList.links.length; i++) {
@@ -28,7 +29,7 @@ const scraper = (async () => {
     for (var j = 0; j < myList.links[i].subs.length; j++) {
       const subSite = myList.links[i].subs[j] || "ycombinator";
       await myTemplate.initialize(subSite);
-      let result = await myTemplate.getResults(5);
+      let result = await myTemplate.getResults(numResults);
 
       resultsArray.push([subSite, result]);
     }
