@@ -26,15 +26,14 @@ const scraper = (async () => {
     }
 
     for (var j = 0; j < myList.links[i].subs.length; j++) {
-      const subSite = myList.links[i].subs[j];
-
+      const subSite = myList.links[i].subs[j] || "ycombinator";
       await myTemplate.initialize(subSite);
-      let result = await myTemplate.getResults(1);
+      let result = await myTemplate.getResults(5);
 
-      resultsArray.push(title, result);
+      resultsArray.push([subSite, result]);
     }
   }
-  let stringArray = JSON.stringify(resultsArray);
+  //let stringArray = JSON.stringify(resultsArray);
   //console.log(stringArray, new Date().getTime());
   return resultsArray;
 })();

@@ -18,17 +18,9 @@ app.use(cors());
 app.use(favicon(path.join(__dirname, "../frontend/public/network.png")));
 
 app.get("/", async (req, res) => {
-  console.log(await scraper); //, new Date().getTime());
-  res.send(await scraper);
+  //console.log(await scraper); //, new Date().getTime());
+  res.json(await scraper);
 });
-
-// app.get("/", (req, res) => {
-//   res.json({
-//     name: "Paul",
-//     age: 37,
-//   });
-//   //res.send("This is your data.");
-// });
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);

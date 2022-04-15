@@ -32,7 +32,7 @@ const self = {
 
       let user = await (await users[i].getProperty("innerText")).jsonValue();
 
-      resultsArray.push([title, link, user]);
+      resultsArray.push({ title: title, link: link, user: user });
     }
 
     return resultsArray;
