@@ -32,10 +32,10 @@ const scraper = (async () => {
       let result = await myTemplate.getResults(numResults);
 
       resultsArray.push([subSite, result]);
+      console.log(resultsArray);
     }
   }
-  //let stringArray = JSON.stringify(resultsArray);
-  //console.log(stringArray, new Date().getTime());
+
   return resultsArray;
 })();
 

@@ -34,6 +34,7 @@ const self = {
       let user = myParsedJson.data.children[i].data.author;
       let score = myParsedJson.data.children[i].data.score;
       let selftext = myParsedJson.data.children[i].data.selftext;
+      let sourceLink = myParsedJson.data.children[i].data.url;
       // If the post isn't a discussion, return the link to what it points to instead of the discussion
       if (selftext === "") {
         selftext = myParsedJson.data.children[i].data.url;
@@ -44,6 +45,7 @@ const self = {
         user: user,
         score: score,
         selfText: selftext,
+        sourceLink: sourceLink,
       });
     }
 
