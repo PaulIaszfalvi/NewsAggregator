@@ -6,8 +6,8 @@
   border: 1px solid #e0e0e0;
   z-index: 1000;
   animation: slideIn 0.15s ease-out;
-  max-width: 630px;
-  max-height: 100vh;
+  max-width: 450px;
+  max-height: 350px;
   pointer-events: auto;
   transition: all 0.1s ease-out;
   will-change: transform, top, left;

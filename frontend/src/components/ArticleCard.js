@@ -25,21 +25,27 @@ function ArticleCard({ article, compact = false }) {
   const calculatePreviewPosition = (e) => {
     if (!cardRef) return { top: 0, left: 0 };
 
-    const rect = cardRef.getBoundingClientRect();
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const previewWidth = 630;
-    const previewHeight = 500;
-    const gap = 5;
+    const previewWidth = 450;
+    const previewHeight = 350;
+    const gap = 12;
 
-    let top = rect.top + window.scrollY + 10;
-    let left = rect.right + gap;
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    let left = mouseX + gap;
+    let top = mouseY + gap;
 
     if (left + previewWidth > windowWidth) {
-      left = rect.left - previewWidth - gap;
+      left = mouseX - previewWidth - gap;
     }
 
-    top = Math.max(10, Math.min(top, window.scrollY + windowHeight - previewHeight - 10));
+    if (top + previewHeight > windowHeight) {
+      top = windowHeight - previewHeight - 10;
+    }
+
+    top = Math.max(10, top);
     left = Math.max(10, Math.min(left, windowWidth - previewWidth - 10));
 
     return { top: `${top}px`, left: `${left}px` };
