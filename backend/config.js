@@ -11,7 +11,7 @@ const config = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     },
-    timeout: 15000,
+    timeout: 30000,
   },
 
   paths: {
