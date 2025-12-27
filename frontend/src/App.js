@@ -102,7 +102,12 @@ function App() {
             </div>
           )}
 
-          {loading && <div className="loading">Loading articles...</div>}
+          {loading && (
+            <div className="loading">
+              <div className="loading-spinner"></div>
+              <span>Loading articles...</span>
+            </div>
+          )}
 
           <NewsList articles={articles} loading={loading} />
         </main>
