@@ -2,8 +2,44 @@ import { useState, useEffect } from 'react';
 import '../styles/NewsList.css';
 import ArticleCard from './ArticleCard';
 
+const STORAGE_KEY = 'newsAggregator_columnOrder';
+
+const getColumnKey = (column) => `${column.source}-${column.subreddit || 'main'}`;
+
 function NewsList({ articles, loading }) {
   const [columns, setColumns] = useState([]);
+
+  const loadSavedOrder = () => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      console.warn('Failed to load column order from localStorage', error);
+      return null;
+    }
+  };
+
+  const applySavedOrder = (newColumns) => {
+    const savedOrder = loadSavedOrder();
+    if (!savedOrder || savedOrder.length === 0) {
+      return newColumns;
+    }
+
+    const columnsByKey = {};
+    newColumns.forEach((col) => {
+      columnsByKey[getColumnKey(col)] = col;
+    });
+
+    const ordered = savedOrder
+      .map((key) => columnsByKey[key])
+      .filter(Boolean);
+
+    const unorderedKeys = new Set(Object.keys(columnsByKey));
+    savedOrder.forEach((key) => unorderedKeys.delete(key));
+    const newColumnsNotInOrder = Array.from(unorderedKeys).map((key) => columnsByKey[key]);
+
+    return [...ordered, ...newColumnsNotInOrder];
+  };
 
   useEffect(() => {
     if (!articles || articles.length === 0) {
@@ -31,8 +67,20 @@ function NewsList({ articles, loading }) {
       articles: column.articles.sort((a, b) => (b.score || 0) - (a.score || 0)),
     }));
 
-    setColumns(columnsWithSortedArticles);
+    const orderedColumns = applySavedOrder(columnsWithSortedArticles);
+    setColumns(orderedColumns);
   }, [articles]);
+
+  useEffect(() => {
+    if (columns.length > 0) {
+      try {
+        const order = columns.map((col) => getColumnKey(col));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+      } catch (error) {
+        console.warn('Failed to save column order to localStorage', error);
+      }
+    }
+  }, [columns]);
 
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
