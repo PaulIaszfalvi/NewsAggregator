@@ -183,8 +183,8 @@ function NewsList({ articles, loading }) {
         Showing {totalArticles} article{totalArticles !== 1 ? 's' : ''} across {columns.length} source{columns.length !== 1 ? 's' : ''} (drag to reorder)
       </div>
 
-      {minimizedColumnsList.length > 0 && (
-        <div className="minimized-columns-section">
+      <div className="minimized-columns-section">
+        {minimizedColumnsList.length > 0 ? (
           <div className="minimized-columns-list">
             {minimizedColumnsList.map((column) => {
               const columnKey = getColumnKey(column);
@@ -201,8 +201,10 @@ function NewsList({ articles, loading }) {
               );
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="minimized-columns-placeholder">No minimized columns</div>
+        )}
+      </div>
 
       <div className="articles-columns">
         {activeColumnsList.map((column, colIdx) => {
