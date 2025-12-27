@@ -55,17 +55,26 @@ class Scraper {
         ),
       ]);
 
-      logger.info(`Successfully scraped ${articles.length} articles from ${linkConfig.title}/${validSub}`, {
+      const seenUrls = new Set();
+      const deduplicatedArticles = articles.filter(article => {
+        if (seenUrls.has(article.url)) {
+          return false;
+        }
+        seenUrls.add(article.url);
+        return true;
+      });
+
+      logger.info(`Successfully scraped ${deduplicatedArticles.length} articles from ${linkConfig.title}/${validSub} (${articles.length - deduplicatedArticles.length} duplicates removed)`, {
         source: siteName,
         sub: validSub,
-        count: articles.length,
+        count: deduplicatedArticles.length,
       });
 
       const result = {
         source: linkConfig.title,
         subreddit: validSub,
-        articles,
-        count: articles.length,
+        articles: deduplicatedArticles,
+        count: deduplicatedArticles.length,
         fetchedAt: new Date().toISOString(),
       };
 
