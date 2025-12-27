@@ -172,6 +172,19 @@
   display: block;
 }
 
+.column-subheader a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.column-subheader a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 .column-articles {
   overflow-y: auto;
   flex: 1;

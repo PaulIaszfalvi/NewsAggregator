@@ -235,7 +235,21 @@ function NewsList({ articles, loading }) {
                 </button>
                 <div>
                   <strong>{column.source}</strong>
-                  {column.subreddit && <span className="column-subheader">{column.subreddit}</span>}
+                  {column.subreddit && (
+                    <span className="column-subheader">
+                      {column.source === 'reddit' ? (
+                        <a
+                          href={`https://reddit.com/r/${column.subreddit}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {column.subreddit}
+                        </a>
+                      ) : (
+                        column.subreddit
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="column-articles">
