@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import '../styles/ArticleCard.css';
 import ArticlePreview from './ArticlePreview';
 
@@ -6,6 +6,8 @@ function ArticleCard({ article, compact = false }) {
   const [showPreview, setShowPreview] = useState(false);
   const [previewPosition, setPreviewPosition] = useState({ top: 0, left: 0 });
   const [cardRef, setCardRef] = useState(null);
+  const [isOverPreview, setIsOverPreview] = useState(false);
+  const hideTimeoutRef = useRef(null);
 
   const {
     title = 'No Title',
@@ -26,22 +28,15 @@ function ArticleCard({ article, compact = false }) {
     const rect = cardRef.getBoundingClientRect();
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const previewWidth = 420;
-    const previewHeight = 400;
-    const gap = 15;
+    const previewWidth = 630;
+    const previewHeight = 500;
+    const gap = 5;
 
-    let top = rect.top + window.scrollY;
+    let top = rect.top + window.scrollY + 10;
     let left = rect.right + gap;
 
     if (left + previewWidth > windowWidth) {
       left = rect.left - previewWidth - gap;
-    }
-
-    const centerY = windowHeight / 2;
-    if (rect.top > centerY) {
-      top = rect.top + window.scrollY - previewHeight + 50;
-    } else {
-      top = rect.bottom + window.scrollY - 50;
     }
 
     top = Math.max(10, Math.min(top, window.scrollY + windowHeight - previewHeight - 10));
@@ -51,6 +46,10 @@ function ArticleCard({ article, compact = false }) {
   };
 
   const handleMouseEnter = (e) => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
     setPreviewPosition(calculatePreviewPosition(e));
     setShowPreview(true);
   };
@@ -62,7 +61,25 @@ function ArticleCard({ article, compact = false }) {
   };
 
   const handleMouseLeave = () => {
-    setShowPreview(false);
+    setIsOverPreview(false);
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowPreview(false);
+    }, 100);
+  };
+
+  const handlePreviewEnter = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    setIsOverPreview(true);
+  };
+
+  const handlePreviewLeave = () => {
+    setIsOverPreview(false);
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowPreview(false);
+    }, 100);
   };
 
   if (compact) {
@@ -83,7 +100,14 @@ function ArticleCard({ article, compact = false }) {
           <span className="article-author-compact">{author}</span>
           {score > 0 && <span className="article-score-compact">↑ {score}</span>}
         </div>
-        {showPreview && <ArticlePreview article={article} position={previewPosition} />}
+        {showPreview && (
+          <ArticlePreview 
+            article={article} 
+            position={previewPosition} 
+            onMouseEnter={handlePreviewEnter}
+            onMouseLeave={handlePreviewLeave}
+          />
+        )}
       </div>
     );
   }
@@ -113,7 +137,14 @@ function ArticleCard({ article, compact = false }) {
         <div className="article-author">By {author}</div>
         {score > 0 && <div className="article-score">Score: {score}</div>}
       </div>
-      {showPreview && <ArticlePreview article={article} position={previewPosition} />}
+      {showPreview && (
+        <ArticlePreview 
+          article={article} 
+          position={previewPosition} 
+          onMouseEnter={handlePreviewEnter}
+          onMouseLeave={handlePreviewLeave}
+        />
+      )}
     </div>
   );
 }

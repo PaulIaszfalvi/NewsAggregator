@@ -1,6 +1,6 @@
 import '../styles/ArticlePreview.css';
 
-function ArticlePreview({ article, position }) {
+function ArticlePreview({ article, position, onMouseEnter, onMouseLeave }) {
   if (!article) return null;
 
   const {
@@ -11,7 +11,12 @@ function ArticlePreview({ article, position }) {
   } = article;
 
   return (
-    <div className="article-preview" style={position}>
+    <div 
+      className="article-preview" 
+      style={position}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       <div className="preview-content">
         <h3 className="preview-title">{title}</h3>
 
