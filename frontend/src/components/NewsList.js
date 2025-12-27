@@ -153,15 +153,18 @@ function NewsList({ articles, loading }) {
   };
 
   if (!articles || articles.length === 0) {
-    return (
-      <div className="news-list-empty">
-        <div className="empty-state">
-          <div className="empty-icon">📰</div>
-          <h3>No articles found</h3>
-          <p>Try adjusting your filters or refreshing the page.</p>
+    if (!loading) {
+      return (
+        <div className="news-list-empty">
+          <div className="empty-state">
+            <div className="empty-icon">📰</div>
+            <h3>No articles found</h3>
+            <p>Try adjusting your filters or refreshing the page.</p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    columns = [];
   }
 
   const totalArticles = columns.reduce((sum, col) => sum + col.articles.length, 0);
