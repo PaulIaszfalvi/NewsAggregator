@@ -29,6 +29,12 @@
 
 .minimized-columns-section {
   margin-bottom: 1.5rem;
+  width: 100%;
+  display: block;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .minimized-columns-list {
