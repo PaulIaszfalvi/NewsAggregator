@@ -126,7 +126,19 @@ function NewsList({ articles, loading }) {
   if (!articles || articles.length === 0) {
     return (
       <div className="news-list-empty">
-        {!loading && <p>No articles found. Try adjusting your filters.</p>}
+        {loading && (
+          <div className="empty-loading">
+            <div className="spinner"></div>
+            <p>Loading articles...</p>
+          </div>
+        )}
+        {!loading && (
+          <div className="empty-state">
+            <div className="empty-icon">📰</div>
+            <h3>No articles found</h3>
+            <p>Try adjusting your filters or refreshing the page.</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -155,6 +167,16 @@ function NewsList({ articles, loading }) {
               {column.subreddit && <span className="column-subheader">{column.subreddit}</span>}
             </div>
             <div className="column-articles">
+              {loading && column.articles.length === 0 && (
+                <div className="skeleton-loader">
+                  {[...Array(3)].map((_, idx) => (
+                    <div key={`skeleton-${idx}`} className="skeleton-item">
+                      <div className="skeleton-title"></div>
+                      <div className="skeleton-footer"></div>
+                    </div>
+                  ))}
+                </div>
+              )}
               {column.articles.map((article, idx) => (
                 <ArticleCard
                   key={`${article.url || 'article'}-${idx}`}

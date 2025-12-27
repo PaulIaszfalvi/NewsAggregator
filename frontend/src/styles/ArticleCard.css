@@ -75,6 +75,10 @@
   color: #333;
   text-decoration: none;
   transition: color 0.2s;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .article-title a:hover {
