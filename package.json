@@ -19,6 +19,7 @@
     "concurrently": "^3.5.1",
     "cors": "^2.8.5",
     "express": "^4.17.3",
+    "node-fetch": "^2.6.11",
     "puppeteer": "^13.5.1",
     "serve-favicon": "^2.5.0"
   },
