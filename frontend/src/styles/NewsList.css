@@ -16,7 +16,7 @@
 .article-count {
   background: white;
   padding: 1rem 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   color: #666;
   font-size: 0.95rem;
   font-weight: 500;
@@ -27,10 +27,51 @@
   justify-content: space-between;
 }
 
+.minimized-columns-section {
+  margin-bottom: 1.5rem;
+}
+
+.minimized-columns-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.minimized-column-btn {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.minimized-column-btn:hover {
+  background: #f5f5f5;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.minimized-column-btn strong {
+  font-weight: 600;
+}
+
+.minimized-column-subreddit {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-weight: normal;
+}
+
 .articles-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
+  align-items: start;
 }
 
 .article-column {
@@ -40,7 +81,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  max-height: 80vh;
   transition: all 0.2s ease;
   cursor: grab;
 }
@@ -68,6 +108,9 @@
   top: 0;
   z-index: 10;
   user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .column-header.drag-handle {
@@ -78,22 +121,42 @@
   cursor: grabbing;
 }
 
-.column-header strong {
-  display: block;
+.minimize-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
   font-size: 1rem;
-  margin-bottom: 0.25rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.minimize-btn:hover {
+  opacity: 1;
+}
+
+.column-header strong {
+  font-size: 1rem;
 }
 
 .column-subheader {
-  display: block;
   font-size: 0.85rem;
   opacity: 0.9;
   font-weight: normal;
+  display: block;
 }
 
 .column-articles {
   overflow-y: auto;
   flex: 1;
+  max-height: 70vh;
 }
 
 .news-list-empty {
@@ -207,16 +270,12 @@
 
 @media (max-width: 1024px) {
   .articles-columns {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 1600px) {
   .articles-columns {
-    grid-template-columns: 1fr;
-  }
-
-  .article-column {
-    max-height: 60vh;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   }
 }
