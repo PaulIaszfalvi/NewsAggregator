@@ -2,12 +2,13 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  flex-wrap: nowrap;
+  align-items: center;
   background: white;
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: flex-start;
 }
 
 .filter-group {
@@ -234,6 +235,22 @@
 .modal-submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .news-filter {
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .refresh-button,
+  .add-subreddit-button {
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 768px) {
