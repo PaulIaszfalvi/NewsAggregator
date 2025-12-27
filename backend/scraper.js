@@ -57,17 +57,21 @@ class Scraper {
 
       const seenUrls = new Set();
       const deduplicatedArticles = articles.filter(article => {
-        if (seenUrls.has(article.url)) {
+        const url = article.url || 'NO_URL';
+        if (seenUrls.has(url)) {
+          logger.debug(`Duplicate found: ${url}`);
           return false;
         }
-        seenUrls.add(article.url);
+        seenUrls.add(url);
         return true;
       });
 
-      logger.info(`Successfully scraped ${deduplicatedArticles.length} articles from ${linkConfig.title}/${validSub} (${articles.length - deduplicatedArticles.length} duplicates removed)`, {
+      const duplicatesRemoved = articles.length - deduplicatedArticles.length;
+      logger.info(`Successfully scraped ${deduplicatedArticles.length} articles from ${linkConfig.title}/${validSub}${duplicatesRemoved > 0 ? ` (${duplicatesRemoved} duplicates removed)` : ''}`, {
         source: siteName,
         sub: validSub,
         count: deduplicatedArticles.length,
+        duplicatesRemoved,
       });
 
       const result = {
