@@ -2,6 +2,7 @@ const reddit = require('./templates/reddit');
 const ycombinator = require('./templates/ycombinator');
 const logger = require('./utils/logger');
 const config = require('./config');
+const cache = require('./utils/cache');
 const fs = require('fs');
 
 class Scraper {
@@ -26,10 +27,17 @@ class Scraper {
   async _scrapeSource(linkConfig, subreddit, template, numResults) {
     const siteName = linkConfig.title?.toLowerCase();
     const validSub = subreddit?.trim();
+    const cacheKey = `${siteName}:${validSub}`;
 
     if (!validSub) {
       logger.warn(`Skipping empty subreddit for ${linkConfig.title}`, { source: siteName });
       return null;
+    }
+
+    const cachedResult = cache.get(cacheKey);
+    if (cachedResult) {
+      logger.info(`Using cached data for ${linkConfig.title}/${validSub}`, { source: siteName, sub: validSub });
+      return cachedResult;
     }
 
     try {
@@ -53,13 +61,16 @@ class Scraper {
         count: articles.length,
       });
 
-      return {
+      const result = {
         source: linkConfig.title,
         subreddit: validSub,
         articles,
         count: articles.length,
         fetchedAt: new Date().toISOString(),
       };
+
+      cache.set(cacheKey, result, 600);
+      return result;
     } catch (error) {
       logger.error(`Error scraping ${linkConfig.title}/${validSub}`, {
         source: siteName,
@@ -88,7 +99,6 @@ class Scraper {
         if (result) {
           yield result;
         }
-        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
   }
@@ -127,6 +137,18 @@ class Scraper {
     }
 
     return results;
+  }
+
+  clearCache() {
+    cache.clear();
+    logger.info('Cache cleared');
+  }
+
+  clearCacheFor(source, subreddit) {
+    const sourceLower = source?.toLowerCase();
+    const key = `${sourceLower}:${subreddit}`;
+    cache.delete(key);
+    logger.info(`Cache cleared for ${source}/${subreddit}`);
   }
 }
 
