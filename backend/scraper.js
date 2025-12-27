@@ -17,8 +17,68 @@ class Scraper {
     try {
       return require(config.paths.linksConfig);
     } catch (error) {
-      logger.error('Failed to load links configuration', error.message);
+      logger.error('Failed to load links configuration', { error: error.message });
       return { links: [] };
+    }
+  }
+
+  async _scrapeSource(linkConfig, subreddit, template, numResults) {
+    const siteName = linkConfig.title?.toLowerCase();
+    const validSub = subreddit?.trim();
+
+    if (!validSub) {
+      logger.warn(`Skipping empty subreddit for ${linkConfig.title}`, { source: siteName });
+      return null;
+    }
+
+    try {
+      logger.debug(`Scraping ${linkConfig.title}/${validSub}`, { source: siteName, sub: validSub });
+
+      const scrapePromise = (async () => {
+        await template.initialize(validSub);
+        return await template.getResults(numResults);
+      })();
+
+      const articles = await Promise.race([
+        scrapePromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Scrape timeout')), config.scraper.timeout * 2)
+        ),
+      ]);
+
+      logger.info(`Successfully scraped ${articles.length} articles from ${linkConfig.title}/${validSub}`, {
+        source: siteName,
+        sub: validSub,
+        count: articles.length,
+      });
+
+      return {
+        source: linkConfig.title,
+        subreddit: validSub,
+        articles,
+        count: articles.length,
+        fetchedAt: new Date().toISOString(),
+      };
+    } catch (error) {
+      logger.error(`Error scraping ${linkConfig.title}/${validSub}`, {
+        source: siteName,
+        sub: validSub,
+        error: error.message,
+      });
+
+      const mockArticles = getMockData(siteName, validSub).slice(0, numResults);
+
+      logger.info(`Using mock data for ${linkConfig.title}/${validSub}`, { source: siteName, sub: validSub });
+
+      return {
+        source: linkConfig.title,
+        subreddit: validSub,
+        articles: mockArticles,
+        count: mockArticles.length,
+        fetchedAt: new Date().toISOString(),
+        isMock: true,
+        error: error.message,
+      };
     }
   }
 
@@ -26,8 +86,8 @@ class Scraper {
     const results = [];
     const { links } = this.linksConfig;
     
-    if (process.env.USE_MOCK_DATA === 'true') {
-      logger.info('Using mock data mode');
+    if (config.mockData) {
+      logger.info('Using mock data mode', { mode: 'mock' });
       for (const linkConfig of links) {
         for (const subreddit of linkConfig.subs) {
           const validSub = subreddit?.trim();
@@ -56,61 +116,14 @@ class Scraper {
       const template = this.templates[siteName];
 
       if (!template) {
-        logger.warn(`No template found for site: ${linkConfig.title}`);
+        logger.warn(`No template found for site: ${linkConfig.title}`, { source: siteName });
         continue;
       }
 
       for (const subreddit of linkConfig.subs) {
-        let validSub = subreddit?.trim();
-        
-        if (!validSub) {
-          logger.warn(`Skipping empty subreddit for ${linkConfig.title}`);
-          continue;
-        }
-
-        try {
-          logger.debug(`Scraping ${linkConfig.title}/${validSub}`);
-          
-          const scrapePromise = (async () => {
-            await template.initialize(validSub);
-            return await template.getResults(numResults);
-          })();
-
-          const articles = await Promise.race([
-            scrapePromise,
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Scrape timeout')), config.scraper.timeout * 2)
-            ),
-          ]);
-          
-          results.push({
-            source: linkConfig.title,
-            subreddit: validSub,
-            articles,
-            count: articles.length,
-            fetchedAt: new Date().toISOString(),
-          });
-
-          logger.info(`Successfully scraped ${articles.length} articles from ${linkConfig.title}/${validSub}`);
-        } catch (error) {
-          logger.error(`Error scraping ${linkConfig.title}/${validSub}`, error.message);
-          
-          const mockArticles = getMockData(
-            linkConfig.title.toLowerCase(),
-            validSub
-          ).slice(0, numResults);
-          
-          results.push({
-            source: linkConfig.title,
-            subreddit: validSub,
-            articles: mockArticles,
-            count: mockArticles.length,
-            fetchedAt: new Date().toISOString(),
-            isMock: true,
-            error: error.message,
-          });
-          
-          logger.info(`Using mock data for ${linkConfig.title}/${validSub}`);
+        const result = await this._scrapeSource(linkConfig, subreddit, template, numResults);
+        if (result) {
+          results.push(result);
         }
       }
     }
@@ -135,8 +148,8 @@ class Scraper {
 
     const results = [];
 
-    if (process.env.USE_MOCK_DATA === 'true') {
-      logger.info(`Using mock data mode for ${source}`);
+    if (config.mockData) {
+      logger.info(`Using mock data mode for ${source}`, { source: sourceLower, mode: 'mock' });
       for (const sub of linkConfig.subs) {
         const validSub = sub?.trim();
         if (!validSub) continue;
@@ -156,53 +169,9 @@ class Scraper {
     }
 
     for (const sub of linkConfig.subs) {
-      let validSub = sub?.trim();
-
-      if (!validSub) {
-        logger.warn(`Skipping empty subreddit for ${linkConfig.title}`);
-        continue;
-      }
-
-      try {
-        logger.debug(`Scraping ${linkConfig.title}/${validSub}`);
-
-        const scrapePromise = (async () => {
-          await template.initialize(validSub);
-          return await template.getResults(numResults);
-        })();
-
-        const articles = await Promise.race([
-          scrapePromise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Scrape timeout')), config.scraper.timeout * 2)
-          ),
-        ]);
-
-        results.push({
-          source: linkConfig.title,
-          subreddit: validSub,
-          articles,
-          count: articles.length,
-          fetchedAt: new Date().toISOString(),
-        });
-
-        logger.info(`Successfully scraped ${articles.length} articles from ${linkConfig.title}/${validSub}`);
-      } catch (error) {
-        logger.error(`Error scraping ${linkConfig.title}/${validSub}`, error.message);
-
-        const mockArticles = getMockData(sourceLower, validSub).slice(0, numResults);
-
-        results.push({
-          source: linkConfig.title,
-          subreddit: validSub,
-          articles: mockArticles,
-          count: mockArticles.length,
-          fetchedAt: new Date().toISOString(),
-          isMock: true,
-          error: error.message,
-        });
-
-        logger.info(`Using mock data for ${linkConfig.title}/${validSub}`);
+      const result = await this._scrapeSource(linkConfig, sub, template, numResults);
+      if (result) {
+        results.push(result);
       }
     }
 

@@ -52,13 +52,13 @@ class RedditScraper {
             fetchedAt: new Date().toISOString(),
           });
         } catch (error) {
-          logger.warn(`Error parsing Reddit post at index ${i}`, error.message);
+          logger.warn(`Error parsing Reddit post at index ${i}`, { error: error.message });
         }
       }
 
       return articles;
     } catch (error) {
-      logger.error('Failed to get Reddit results', error.message);
+      logger.error('Failed to get Reddit results', { error: error.message });
       throw error;
     }
   }

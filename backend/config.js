@@ -3,6 +3,7 @@ const path = require('path');
 const config = {
   port: process.env.PORT || 3001,
   env: process.env.NODE_ENV || 'development',
+  mockData: process.env.USE_MOCK_DATA === 'true',
   
   scraper: {
     defaultResultsPerSource: 50,
@@ -11,7 +12,6 @@ const config = {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     },
     timeout: 15000,
-    useMockData: process.env.USE_MOCK_DATA === 'true',
   },
 
   paths: {

@@ -1,14 +1,42 @@
-const BaseScraper = require('../scrapers/BaseScraper');
+const puppeteer = require('puppeteer');
 const logger = require('../utils/logger');
+const config = require('../config');
 
-class YCombinatorScraper extends BaseScraper {
+class YCombinatorScraper {
   constructor() {
-    super('YCombinator');
+    this.name = 'YCombinator';
     this.baseUrl = 'https://news.ycombinator.com';
+    this.browser = null;
+    this.page = null;
   }
 
   async initialize() {
-    await super.initialize(this.baseUrl);
+    try {
+      logger.debug('Launching browser for YCombinator', { action: 'launch' });
+      this.browser = await puppeteer.launch(config.scraper.puppeteer);
+      this.page = await this.browser.newPage();
+
+      logger.debug('Navigating to YCombinator', { url: this.baseUrl });
+      await this.page.goto(this.baseUrl, {
+        waitUntil: 'networkidle2',
+        timeout: config.scraper.timeout,
+      });
+      logger.debug('Initialized YCombinator scraper', { status: 'ready' });
+    } catch (error) {
+      logger.error('Failed to initialize YCombinator scraper', { error: error.message });
+      await this._cleanup();
+      throw error;
+    }
+  }
+
+  async _cleanup() {
+    try {
+      if (this.page) await this.page.close();
+      if (this.browser) await this.browser.close();
+      logger.debug('Cleaned up YCombinator scraper', { status: 'closed' });
+    } catch (error) {
+      logger.warn('Error during cleanup for YCombinator', { error: error.message });
+    }
   }
 
   async getResults(numResults) {
@@ -24,23 +52,23 @@ class YCombinatorScraper extends BaseScraper {
           const link = await this._getPropertyValue(titles[i], 'href');
           const user = await this._getPropertyValue(users[i], 'innerText');
 
-          articles.push(this.normalizeResult({
+          articles.push(this._normalizeResult({
             title,
             author: this._parseAuthorFromSubtext(user),
             score: this._parseScoreFromSubtext(user),
             url: link,
           }));
         } catch (error) {
-          logger.warn(`Error parsing HN item at index ${i}`, error.message);
+          logger.warn(`Error parsing HN item at index ${i}`, { error: error.message });
         }
       }
 
       return articles;
     } catch (error) {
-      logger.error('Failed to get YCombinator results', error.message);
+      logger.error('Failed to get YCombinator results', { error: error.message });
       throw error;
     } finally {
-      await this.cleanup();
+      await this._cleanup();
     }
   }
 
@@ -49,9 +77,20 @@ class YCombinatorScraper extends BaseScraper {
       const propHandle = await element.getProperty(property);
       return await propHandle.jsonValue();
     } catch (error) {
-      logger.debug(`Could not get property ${property}`, error.message);
+      logger.debug(`Could not get property ${property}`, { error: error.message });
       return '';
     }
+  }
+
+  _normalizeResult(article) {
+    return {
+      title: article.title?.trim() || 'No title',
+      author: article.author || 'Unknown',
+      score: article.score || 0,
+      url: article.url || '#',
+      source: this.name,
+      fetchedAt: new Date().toISOString(),
+    };
   }
 
   _parseAuthorFromSubtext(subtext) {
