@@ -82,6 +82,7 @@
   cursor: pointer;
   transition: all 0.3s;
   box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+  margin-left: auto;
 }
 
 .add-subreddit-button:hover:not(:disabled) {
@@ -248,5 +249,6 @@
   .refresh-button,
   .add-subreddit-button {
     width: 100%;
+    margin-left: 0;
   }
 }
