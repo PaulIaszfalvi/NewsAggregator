@@ -138,6 +138,11 @@ app.get('/api/subreddits', (req, res, next) => {
   }
 });
 
+app.post('/api/cache/clear', (req, res) => {
+  scraper.clearCache();
+  res.json({ success: true, message: 'Cache cleared' });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
