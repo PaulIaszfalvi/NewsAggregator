@@ -58,6 +58,22 @@
   white-space: nowrap;
 }
 
+.minimized-column-btn strong {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.mock-badge-small {
+  background: #ff9800;
+  color: white;
+  font-size: 0.55rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 2px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 .minimized-column-btn:hover {
   background: #f5f5f5;
   border-color: #667eea;
@@ -159,6 +175,19 @@
 
 .column-header strong {
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mock-badge {
+  background: #ff9800;
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .column-subheader {
