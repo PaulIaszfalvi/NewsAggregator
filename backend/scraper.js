@@ -88,6 +88,7 @@ class Scraper {
         if (result) {
           yield result;
         }
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
   }
