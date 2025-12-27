@@ -46,6 +46,14 @@ class RedditScraper {
 
         if (articles.length >= validNum) break;
 
+        const images = [];
+        if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'spoiler' && post.thumbnail !== 'default') {
+          images.push(post.thumbnail);
+        }
+        if (post.preview?.images?.[0]?.source?.url) {
+          images.push(post.preview.images[0].source.url);
+        }
+
         articles.push({
           title: post.title?.trim() || 'No title',
           author: post.author || 'Unknown',
@@ -53,6 +61,8 @@ class RedditScraper {
           url: post.url?.startsWith('http') ? post.url : `https://reddit.com${post.permalink}`,
           source: this.name,
           fetchedAt: new Date().toISOString(),
+          body: post.selftext || '',
+          images,
         });
       }
 

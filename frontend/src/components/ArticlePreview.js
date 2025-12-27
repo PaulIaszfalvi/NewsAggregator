@@ -5,36 +5,35 @@ function ArticlePreview({ article, position }) {
 
   const {
     title = 'No Title',
-    author = 'Unknown',
-    score = 0,
+    body = '',
+    images = [],
     url = '#',
-    source = 'Unknown',
   } = article;
 
   return (
     <div className="article-preview" style={position}>
       <div className="preview-content">
-        <div className="preview-header">
-          <h3 className="preview-title">{title}</h3>
-          <a 
-            href={url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="preview-link"
-          >
-            View Full Post →
-          </a>
-        </div>
+        <h3 className="preview-title">{title}</h3>
 
-        <div className="preview-meta">
-          <span className="preview-source">{source}</span>
-          <span className="preview-author">By {author}</span>
-          {score > 0 && <span className="preview-score">↑ {score}</span>}
-        </div>
+        {images.length > 0 && (
+          <div className="preview-images">
+            {images.map((img, idx) => (
+              <img 
+                key={idx} 
+                src={img} 
+                alt="preview" 
+                className="preview-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            ))}
+          </div>
+        )}
 
-        <div className="preview-body">
-          <p>Click "View Full Post" to read the complete article on {source}.</p>
-        </div>
+        {body && (
+          <div className="preview-body">
+            <p>{body.substring(0, 300)}{body.length > 300 ? '...' : ''}</p>
+          </div>
+        )}
       </div>
     </div>
   );
