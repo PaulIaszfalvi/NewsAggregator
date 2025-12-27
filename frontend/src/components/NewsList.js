@@ -26,7 +26,12 @@ function NewsList({ articles, loading }) {
       }
     });
 
-    setColumns(Object.values(groupedBySubreddit));
+    const columnsWithSortedArticles = Object.values(groupedBySubreddit).map((column) => ({
+      ...column,
+      articles: column.articles.sort((a, b) => (b.score || 0) - (a.score || 0)),
+    }));
+
+    setColumns(columnsWithSortedArticles);
   }, [articles]);
 
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -88,7 +93,7 @@ function NewsList({ articles, loading }) {
       <div className="articles-columns">
         {columns.map((column, colIdx) => (
           <div
-            key={`${column.source}-${column.subreddit}`}
+            key={`${column.source}-${column.subreddit || 'main'}`}
             className={`article-column ${draggedIndex === colIdx ? 'dragging' : ''} ${dragOverIndex === colIdx ? 'drag-over' : ''}`}
             draggable
             onDragStart={(e) => handleDragStart(e, colIdx)}
@@ -103,7 +108,11 @@ function NewsList({ articles, loading }) {
             </div>
             <div className="column-articles">
               {column.articles.map((article, idx) => (
-                <ArticleCard key={idx} article={article} compact={true} />
+                <ArticleCard
+                  key={`${article.url || 'article'}-${idx}`}
+                  article={article}
+                  compact={true}
+                />
               ))}
             </div>
           </div>
