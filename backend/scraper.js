@@ -2,7 +2,6 @@ const reddit = require('./templates/reddit');
 const ycombinator = require('./templates/ycombinator');
 const logger = require('./utils/logger');
 const config = require('./config');
-const { getMockData } = require('./utils/mockData');
 const fs = require('fs');
 
 class Scraper {
@@ -67,51 +66,13 @@ class Scraper {
         sub: validSub,
         error: error.message,
       });
-
-      const mockArticles = getMockData(siteName, validSub).slice(0, numResults);
-
-      logger.info(`Using mock data for ${linkConfig.title}/${validSub}`, { source: siteName, sub: validSub });
-
-      return {
-        source: linkConfig.title,
-        subreddit: validSub,
-        articles: mockArticles,
-        count: mockArticles.length,
-        fetchedAt: new Date().toISOString(),
-        isMock: true,
-        error: error.message,
-      };
+      throw error;
     }
   }
 
   async *scrapeAllStream(numResults = config.scraper.defaultResultsPerSource) {
     const linksConfig = this._loadConfig();
     const { links } = linksConfig;
-    
-    if (config.mockData) {
-      logger.info('Using mock data mode', { mode: 'mock' });
-      for (const linkConfig of links) {
-        for (const subreddit of linkConfig.subs) {
-          const validSub = subreddit?.trim();
-          if (!validSub) continue;
-          
-          const mockArticles = getMockData(
-            linkConfig.title.toLowerCase(),
-            validSub
-          ).slice(0, numResults);
-          
-          yield {
-            source: linkConfig.title,
-            subreddit: validSub,
-            articles: mockArticles,
-            count: mockArticles.length,
-            fetchedAt: new Date().toISOString(),
-            isMock: true,
-          };
-        }
-      }
-      return;
-    }
 
     for (const linkConfig of links) {
       const siteName = linkConfig.title?.toLowerCase();
@@ -156,26 +117,6 @@ class Scraper {
     }
 
     const results = [];
-
-    if (config.mockData) {
-      logger.info(`Using mock data mode for ${source}`, { source: sourceLower, mode: 'mock' });
-      for (const sub of linkConfig.subs) {
-        const validSub = sub?.trim();
-        if (!validSub) continue;
-
-        const mockArticles = getMockData(sourceLower, validSub).slice(0, numResults);
-
-        results.push({
-          source: linkConfig.title,
-          subreddit: validSub,
-          articles: mockArticles,
-          count: mockArticles.length,
-          fetchedAt: new Date().toISOString(),
-          isMock: true,
-        });
-      }
-      return results;
-    }
 
     for (const sub of linkConfig.subs) {
       const result = await this._scrapeSource(linkConfig, sub, template, numResults);

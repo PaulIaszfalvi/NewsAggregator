@@ -64,7 +64,6 @@ function NewsList({ articles, loading }) {
           source: section.source,
           subreddit: section.subreddit,
           articles: [],
-          isMock: section.isMock || false,
         };
       }
       if (Array.isArray(section.articles)) {
@@ -196,10 +195,7 @@ function NewsList({ articles, loading }) {
                   onClick={() => toggleMinimized(columnKey)}
                   title={`Expand ${column.source}${column.subreddit ? ` / ${column.subreddit}` : ''}`}
                 >
-                  <strong>
-                    {column.source}
-                    {column.isMock && <span className="mock-badge-small">mock</span>}
-                  </strong>
+                  <strong>{column.source}</strong>
                   {column.subreddit && <span className="minimized-column-subreddit">{column.subreddit}</span>}
                 </button>
               );
@@ -234,10 +230,7 @@ function NewsList({ articles, loading }) {
                   ▼
                 </button>
                 <div>
-                  <strong>
-                    {column.source}
-                    {column.isMock && <span className="mock-badge">mock</span>}
-                  </strong>
+                  <strong>{column.source}</strong>
                   {column.subreddit && <span className="column-subheader">{column.subreddit}</span>}
                 </div>
               </div>
