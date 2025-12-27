@@ -155,19 +155,11 @@ function NewsList({ articles, loading }) {
   if (!articles || articles.length === 0) {
     return (
       <div className="news-list-empty">
-        {loading && (
-          <div className="empty-loading">
-            <div className="spinner"></div>
-            <p>Loading articles...</p>
-          </div>
-        )}
-        {!loading && (
-          <div className="empty-state">
-            <div className="empty-icon">📰</div>
-            <h3>No articles found</h3>
-            <p>Try adjusting your filters or refreshing the page.</p>
-          </div>
-        )}
+        <div className="empty-state">
+          <div className="empty-icon">📰</div>
+          <h3>No articles found</h3>
+          <p>Try adjusting your filters or refreshing the page.</p>
+        </div>
       </div>
     );
   }

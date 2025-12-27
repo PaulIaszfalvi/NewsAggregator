@@ -1,5 +1,6 @@
 const logger = require('../utils/logger');
 const validators = require('../utils/validators');
+const { retryWithBackoff } = require('../utils/retryWithBackoff');
 
 class RedditScraper {
   constructor() {
@@ -24,15 +25,19 @@ class RedditScraper {
     try {
       const validNum = Math.min(Math.max(numResults, 1), 50);
 
-      const response = await fetch(this.url, {
-        headers: {
-          'User-Agent': 'NewsAggregator/1.0 (Educational)',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+      const response = await retryWithBackoff(() =>
+        fetch(this.url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+          },
+        })
+      );
 
       const json = await response.json();
       const children = json.data?.children || [];
