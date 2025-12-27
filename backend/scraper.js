@@ -3,6 +3,7 @@ const ycombinator = require('./templates/ycombinator');
 const logger = require('./utils/logger');
 const config = require('./config');
 const { getMockData } = require('./utils/mockData');
+const fs = require('fs');
 
 class Scraper {
   constructor() {
@@ -15,7 +16,8 @@ class Scraper {
 
   _loadConfig() {
     try {
-      return require(config.paths.linksConfig);
+      const configContent = fs.readFileSync(config.paths.linksConfig, 'utf-8');
+      return JSON.parse(configContent);
     } catch (error) {
       logger.error('Failed to load links configuration', { error: error.message });
       return { links: [] };
@@ -83,7 +85,8 @@ class Scraper {
   }
 
   async *scrapeAllStream(numResults = config.scraper.defaultResultsPerSource) {
-    const { links } = this.linksConfig;
+    const linksConfig = this._loadConfig();
+    const { links } = linksConfig;
     
     if (config.mockData) {
       logger.info('Using mock data mode', { mode: 'mock' });
@@ -138,7 +141,8 @@ class Scraper {
 
   async scrapeBySource(source, numResults = config.scraper.defaultResultsPerSource) {
     const sourceLower = source?.toLowerCase();
-    const linkConfig = this.linksConfig.links.find(
+    const linksConfig = this._loadConfig();
+    const linkConfig = linksConfig.links.find(
       (l) => l.title?.toLowerCase() === sourceLower
     );
 

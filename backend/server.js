@@ -111,8 +111,6 @@ app.post('/api/subreddits', (req, res, next) => {
 
     fs.writeFileSync(linksConfigPath, JSON.stringify(linksConfig, null, 2));
 
-    scraper.linksConfig = linksConfig;
-
     logger.info(`Added subreddit ${subredditTrim} to ${source}`, {
       source: sourceLower,
       subreddit: subredditTrim,
