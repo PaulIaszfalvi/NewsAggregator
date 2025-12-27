@@ -152,19 +152,28 @@ function NewsList({ articles, loading }) {
     setDragOverIndex(null);
   };
 
-  if (!articles || articles.length === 0) {
-    if (!loading) {
-      return (
-        <div className="news-list-empty">
-          <div className="empty-state">
-            <div className="empty-icon">📰</div>
-            <h3>No articles found</h3>
-            <p>Try adjusting your filters or refreshing the page.</p>
-          </div>
+  if (!loading && (!articles || articles.length === 0)) {
+    return (
+      <div className="news-list-empty">
+        <div className="empty-state">
+          <div className="empty-icon">📰</div>
+          <h3>No articles found</h3>
+          <p>Try adjusting your filters or refreshing the page.</p>
         </div>
-      );
-    }
-    columns = [];
+      </div>
+    );
+  }
+
+  if (loading && columns.length === 0) {
+    return (
+      <div className="news-list">
+        <div className="article-count">Preparing articles...</div>
+        <div className="minimized-columns-section">
+          <div className="minimized-columns-placeholder">No minimized columns</div>
+        </div>
+        <div className="articles-columns"></div>
+      </div>
+    );
   }
 
   const totalArticles = columns.reduce((sum, col) => sum + col.articles.length, 0);
