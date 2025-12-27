@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import '../styles/NewsFilter.css';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function NewsFilter({
   selectedSource,
@@ -8,6 +11,11 @@ function NewsFilter({
   onRefresh,
   loading,
 }) {
+  const [showAddSubredditModal, setShowAddSubredditModal] = useState(false);
+  const [newSubreddit, setNewSubreddit] = useState('');
+  const [addingSubreddit, setAddingSubreddit] = useState(false);
+  const [addError, setAddError] = useState(null);
+
   const sources = [
     { value: 'all', label: 'All Sources' },
     { value: 'reddit', label: 'Reddit' },
@@ -15,6 +23,41 @@ function NewsFilter({
   ];
 
   const limits = [10, 20, 30, 50, 100];
+
+  const handleAddSubreddit = async (e) => {
+    e.preventDefault();
+    setAddError(null);
+
+    if (!newSubreddit.trim()) {
+      setAddError('Please enter a subreddit name');
+      return;
+    }
+
+    setAddingSubreddit(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/subreddits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'reddit',
+          subreddit: newSubreddit.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add subreddit');
+      }
+
+      setNewSubreddit('');
+      setShowAddSubredditModal(false);
+      onRefresh();
+    } catch (error) {
+      setAddError(error.message);
+    } finally {
+      setAddingSubreddit(false);
+    }
+  };
 
   return (
     <div className="news-filter">
@@ -59,6 +102,59 @@ function NewsFilter({
       >
         {loading ? 'Loading...' : 'Refresh'}
       </button>
+
+      <button
+        onClick={() => setShowAddSubredditModal(true)}
+        disabled={loading}
+        className="add-subreddit-button"
+      >
+        + Add Subreddit
+      </button>
+
+      {showAddSubredditModal && (
+        <div className="modal-overlay" onClick={() => setShowAddSubredditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Add New Subreddit</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowAddSubredditModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleAddSubreddit}>
+              <input
+                type="text"
+                placeholder="Enter subreddit name (e.g., python)"
+                value={newSubreddit}
+                onChange={(e) => setNewSubreddit(e.target.value)}
+                disabled={addingSubreddit}
+                className="subreddit-input"
+                autoFocus
+              />
+              {addError && <div className="error-message-modal">{addError}</div>}
+              <div className="modal-buttons">
+                <button
+                  type="button"
+                  onClick={() => setShowAddSubredditModal(false)}
+                  className="modal-cancel-btn"
+                  disabled={addingSubreddit}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="modal-submit-btn"
+                  disabled={addingSubreddit}
+                >
+                  {addingSubreddit ? 'Adding...' : 'Add Subreddit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

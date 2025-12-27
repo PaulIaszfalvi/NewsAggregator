@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const favicon = require('serve-favicon');
 const fs = require('fs');
+const path = require('path');
 
 const config = require('./config');
 const logger = require('./utils/logger');
@@ -67,6 +68,74 @@ app.get('/api/news/:source', async (req, res, next) => {
     res.end();
   } catch (error) {
     logger.error(`Failed to fetch ${req.params.source} news`, error.message);
+    next(error);
+  }
+});
+
+app.post('/api/subreddits', (req, res, next) => {
+  try {
+    const { source, subreddit } = req.body;
+
+    if (!source || !subreddit) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing source or subreddit',
+      });
+    }
+
+    const sourceLower = source.toLowerCase().trim();
+    const subredditTrim = subreddit.trim();
+
+    const linksConfigPath = config.paths.linksConfig;
+    let linksConfig = JSON.parse(fs.readFileSync(linksConfigPath, 'utf-8'));
+
+    const linkConfig = linksConfig.links.find(
+      (l) => l.title.toLowerCase() === sourceLower
+    );
+
+    if (!linkConfig) {
+      return res.status(400).json({
+        success: false,
+        error: `Unknown source: ${source}`,
+      });
+    }
+
+    if (linkConfig.subs.includes(subredditTrim)) {
+      return res.status(400).json({
+        success: false,
+        error: `Subreddit already exists: ${subredditTrim}`,
+      });
+    }
+
+    linkConfig.subs.push(subredditTrim);
+
+    fs.writeFileSync(linksConfigPath, JSON.stringify(linksConfig, null, 2));
+
+    scraper.linksConfig = linksConfig;
+
+    logger.info(`Added subreddit ${subredditTrim} to ${source}`, {
+      source: sourceLower,
+      subreddit: subredditTrim,
+    });
+
+    res.json({
+      success: true,
+      message: `Added ${subredditTrim} to ${source}`,
+      subreddit: subredditTrim,
+    });
+  } catch (error) {
+    logger.error('Failed to add subreddit', error.message);
+    next(error);
+  }
+});
+
+app.get('/api/subreddits', (req, res, next) => {
+  try {
+    const linksConfigPath = config.paths.linksConfig;
+    const linksConfig = JSON.parse(fs.readFileSync(linksConfigPath, 'utf-8'));
+    res.json(linksConfig.links);
+  } catch (error) {
+    logger.error('Failed to fetch subreddits', error.message);
     next(error);
   }
 });
