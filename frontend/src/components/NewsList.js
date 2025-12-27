@@ -19,7 +19,7 @@ function NewsList({ articles, loading }) {
     }
   };
 
-  const applySavedOrder = (newColumns) => {
+  const loadAndApplySavedOrder = (newColumns) => {
     const savedOrder = loadSavedOrder();
     if (!savedOrder || savedOrder.length === 0) {
       return newColumns;
@@ -67,7 +67,7 @@ function NewsList({ articles, loading }) {
       articles: column.articles.sort((a, b) => (b.score || 0) - (a.score || 0)),
     }));
 
-    const orderedColumns = applySavedOrder(columnsWithSortedArticles);
+    const orderedColumns = loadAndApplySavedOrder(columnsWithSortedArticles);
     setColumns(orderedColumns);
   }, [articles]);
 

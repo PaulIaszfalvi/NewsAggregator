@@ -28,12 +28,30 @@ function App() {
         throw new Error(`API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setArticles(data.data || []);
-      } else {
-        throw new Error(data.error || 'Failed to fetch news');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      setArticles([]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines[lines.length - 1];
+
+        for (let i = 0; i < lines.length - 1; i++) {
+          if (lines[i].trim()) {
+            try {
+              const section = JSON.parse(lines[i]);
+              setArticles(prev => [...prev, section]);
+            } catch (e) {
+              console.warn('Failed to parse line:', lines[i]);
+            }
+          }
+        }
       }
     } catch (err) {
       setError(err.message);

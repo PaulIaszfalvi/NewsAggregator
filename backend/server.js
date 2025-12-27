@@ -21,13 +21,21 @@ app.get('/api/news', async (req, res, next) => {
     const numResults = parseInt(req.query.limit, 10) || config.scraper.defaultResultsPerSource;
     logger.debug('Fetching news articles', { limit: numResults });
     
-    const results = await scraper.scrapeAll(numResults);
+    res.setHeader('Content-Type', 'application/x-ndjson');
+    res.setHeader('Transfer-Encoding', 'chunked');
     
-    res.json({
-      success: true,
-      data: results,
-      timestamp: new Date().toISOString(),
-    });
+    for await (const section of scraper.scrapeAllStream(numResults)) {
+      const flattenedSection = {
+        ...section,
+        articles: section.articles.map(article => ({
+          ...article,
+          subreddit: section.subreddit,
+        })),
+      };
+      res.write(JSON.stringify(flattenedSection) + '\n');
+    }
+    
+    res.end();
   } catch (error) {
     logger.error('Failed to fetch news', error.message);
     next(error);
@@ -40,14 +48,23 @@ app.get('/api/news/:source', async (req, res, next) => {
     const numResults = parseInt(req.query.limit, 10) || config.scraper.defaultResultsPerSource;
     logger.debug(`Fetching ${source} articles`, { limit: numResults });
     
+    res.setHeader('Content-Type', 'application/x-ndjson');
+    res.setHeader('Transfer-Encoding', 'chunked');
+    
     const results = await scraper.scrapeBySource(source, numResults);
     
-    res.json({
-      success: true,
-      source,
-      data: results,
-      timestamp: new Date().toISOString(),
-    });
+    for (const section of results) {
+      const flattenedSection = {
+        ...section,
+        articles: section.articles.map(article => ({
+          ...article,
+          subreddit: section.subreddit,
+        })),
+      };
+      res.write(JSON.stringify(flattenedSection) + '\n');
+    }
+    
+    res.end();
   } catch (error) {
     logger.error(`Failed to fetch ${req.params.source} news`, error.message);
     next(error);

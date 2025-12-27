@@ -82,8 +82,7 @@ class Scraper {
     }
   }
 
-  async scrapeAll(numResults = config.scraper.defaultResultsPerSource) {
-    const results = [];
+  async *scrapeAllStream(numResults = config.scraper.defaultResultsPerSource) {
     const { links } = this.linksConfig;
     
     if (config.mockData) {
@@ -98,17 +97,17 @@ class Scraper {
             validSub
           ).slice(0, numResults);
           
-          results.push({
+          yield {
             source: linkConfig.title,
             subreddit: validSub,
             articles: mockArticles,
             count: mockArticles.length,
             fetchedAt: new Date().toISOString(),
             isMock: true,
-          });
+          };
         }
       }
-      return results;
+      return;
     }
 
     for (const linkConfig of links) {
@@ -123,11 +122,17 @@ class Scraper {
       for (const subreddit of linkConfig.subs) {
         const result = await this._scrapeSource(linkConfig, subreddit, template, numResults);
         if (result) {
-          results.push(result);
+          yield result;
         }
       }
     }
+  }
 
+  async scrapeAll(numResults = config.scraper.defaultResultsPerSource) {
+    const results = [];
+    for await (const result of this.scrapeAllStream(numResults)) {
+      results.push(result);
+    }
     return results;
   }
 
