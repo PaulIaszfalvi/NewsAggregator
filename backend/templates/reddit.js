@@ -1,56 +1,66 @@
-const puppeteer = require("puppeteer");
+const logger = require('../utils/logger');
+const validators = require('../utils/validators');
 
-let SUBREDDIT_URL = (reddit) => `https://old.reddit.com/r/${reddit}/`;
+class RedditScraper {
+  constructor() {
+    this.name = 'Reddit';
+    this.baseUrl = 'https://old.reddit.com/r';
+  }
 
-const self = {
-  browser: null,
-  page: null,
+  async initialize(subreddit) {
+    const sanitized = validators.sanitizeSubreddit(subreddit);
+    if (!validators.isValidSubreddit(sanitized)) {
+      throw new Error(`Invalid subreddit name: ${subreddit}`);
+    }
+    this.subreddit = sanitized;
+  }
 
-  // setURL: async (mainURL) => {
-  //   SUBREDDIT_URL = mainURL;
-  // },
-  //get url and make a call
-  initialize: async (reddit) => {
-    self.browser = await puppeteer.launch({
-      // headless: false,
-    });
-    self.page = await self.browser.newPage();
+  async getResults(numResults) {
+    try {
+      const validNum = Math.min(Math.max(numResults, 1), 50);
+      const url = `${this.baseUrl}/${this.subreddit}/.json`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      });
 
-    await self.page.goto(SUBREDDIT_URL(reddit) + ".json", {
-      waitUntil: "networkidle0",
-    });
-  },
-
-  getResults: async (nr) => {
-    let elements = await self.page.$eval("*", (el) => el.innerText);
-    let myArray = [];
-
-    let myParsedJson = JSON.parse(elements);
-
-    // Get all the required data.
-
-    for (let i = 0; i < nr; i++) {
-      let title = myParsedJson.data.children[i].data.title;
-      let user = myParsedJson.data.children[i].data.author;
-      let score = myParsedJson.data.children[i].data.score;
-      let selftext = myParsedJson.data.children[i].data.selftext;
-      let sourceLink = myParsedJson.data.children[i].data.url;
-      // If the post isn't a discussion, return the link to what it points to instead of the discussion
-      if (selftext === "") {
-        selftext = myParsedJson.data.children[i].data.url;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      myArray.push({
-        title: title,
-        user: user,
-        score: score,
-        selfText: selftext,
-        sourceLink: sourceLink,
-      });
+      const jsonData = await response.json();
+      
+      const articles = [];
+      const children = jsonData?.data?.children || [];
+      
+      for (let i = 0; i < children.length && articles.length < validNum; i++) {
+        try {
+          const post = children[i]?.data;
+          if (!post) continue;
+          
+          if (post.stickied) continue;
+
+          articles.push({
+            title: post.title?.trim() || 'No title',
+            author: post.author || 'Unknown',
+            score: post.score || 0,
+            url: post.url || `https://reddit.com${post.permalink}` || '#',
+            source: this.name,
+            fetchedAt: new Date().toISOString(),
+          });
+        } catch (error) {
+          logger.warn(`Error parsing Reddit post at index ${i}`, error.message);
+        }
+      }
+
+      return articles;
+    } catch (error) {
+      logger.error('Failed to get Reddit results', error.message);
+      throw error;
     }
+  }
+}
 
-    return myArray;
-  },
-};
-
-module.exports = self;
+module.exports = new RedditScraper();

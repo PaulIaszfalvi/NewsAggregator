@@ -2,7 +2,7 @@
   "links": [
     {
       "title": "reddit",
-      "main": "https://wwww.reddit.com/r/",
+      "main": "https://www.reddit.com/r/",
       "subs": [
         "learnprogramming",
         "programminghumor",
@@ -16,7 +16,7 @@
     {
       "title": "ycombinator",
       "main": "https://news.ycombinator.com",
-      "subs": [""]
+      "subs": []
     }
   ]
 }
