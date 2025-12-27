@@ -82,6 +82,14 @@ class Scraper {
         fetchedAt: new Date().toISOString(),
       };
 
+      logger.debug(`Cache key: "${cacheKey}" | Articles returned for: ${linkConfig.title}/${validSub}`, {
+        cacheKey,
+        source: linkConfig.title,
+        subreddit: validSub,
+        articleCount: deduplicatedArticles.length,
+        firstArticleTitle: deduplicatedArticles[0]?.title,
+      });
+
       cache.set(cacheKey, result, 600);
       return result;
     } catch (error) {
