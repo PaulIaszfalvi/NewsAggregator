@@ -109,7 +109,7 @@ function App() {
             </div>
           )}
 
-          <NewsList articles={articles} loading={loading} />
+          <NewsList articles={articles} loading={loading} onRefresh={handleRefresh} />
         </main>
       </div>
     </ErrorBoundary>

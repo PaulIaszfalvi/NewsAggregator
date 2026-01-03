@@ -127,6 +127,62 @@ app.post('/api/subreddits', (req, res, next) => {
   }
 });
 
+app.delete('/api/subreddits', (req, res, next) => {
+  try {
+    const { source, subreddit } = req.body;
+
+    if (!source || !subreddit) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing source or subreddit',
+      });
+    }
+
+    const sourceLower = source.toLowerCase().trim();
+    const subredditTrim = subreddit.trim();
+
+    const linksConfigPath = config.paths.linksConfig;
+    let linksConfig = JSON.parse(fs.readFileSync(linksConfigPath, 'utf-8'));
+
+    const linkConfig = linksConfig.links.find(
+      (l) => l.title.toLowerCase() === sourceLower
+    );
+
+    if (!linkConfig) {
+      return res.status(400).json({
+        success: false,
+        error: `Unknown source: ${source}`,
+      });
+    }
+
+    const index = linkConfig.subs.indexOf(subredditTrim);
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        error: `Subreddit not found: ${subredditTrim}`,
+      });
+    }
+
+    linkConfig.subs.splice(index, 1);
+
+    fs.writeFileSync(linksConfigPath, JSON.stringify(linksConfig, null, 2));
+
+    logger.info(`Removed subreddit ${subredditTrim} from ${source}`, {
+      source: sourceLower,
+      subreddit: subredditTrim,
+    });
+
+    res.json({
+      success: true,
+      message: `Removed ${subredditTrim} from ${source}`,
+      subreddit: subredditTrim,
+    });
+  } catch (error) {
+    logger.error('Failed to remove subreddit', error.message);
+    next(error);
+  }
+});
+
 app.get('/api/subreddits', (req, res, next) => {
   try {
     const linksConfigPath = config.paths.linksConfig;

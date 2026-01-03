@@ -4,10 +4,11 @@ import ArticleCard from './ArticleCard';
 
 const STORAGE_KEY = 'newsAggregator_columnOrder';
 const MINIMIZED_KEY = 'newsAggregator_minimizedColumns';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const getColumnKey = (column) => `${column.source}-${column.subreddit || 'main'}`;
 
-function NewsList({ articles, loading }) {
+function NewsList({ articles, loading, onRefresh }) {
   const [columns, setColumns] = useState([]);
   const [minimizedColumns, setMinimizedColumns] = useState(() => {
     try {
@@ -152,6 +153,29 @@ function NewsList({ articles, loading }) {
     setDragOverIndex(null);
   };
 
+  const handleDeleteSubreddit = async (source, subreddit) => {
+    if (!window.confirm(`Are you sure you want to remove r/${subreddit}?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/subreddits`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source, subreddit }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete subreddit');
+      }
+
+      onRefresh();
+    } catch (error) {
+      alert(`Error deleting subreddit: ${error.message}`);
+    }
+  };
+
   if (!loading && (!articles || articles.length === 0)) {
     return (
       <div className="news-list-empty">
@@ -200,7 +224,22 @@ function NewsList({ articles, loading }) {
                   title={`Expand ${column.source}${column.subreddit ? ` / ${column.subreddit}` : ''}`}
                 >
                   <strong>{column.source}</strong>
-                  {column.subreddit && <span className="minimized-column-subreddit">{column.subreddit}</span>}
+                  {column.subreddit && (
+                    <>
+                      <span className="minimized-column-subreddit">{column.subreddit}</span>
+                      <span
+                        className="delete-subreddit-btn-min"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSubreddit(column.source, column.subreddit);
+                        }}
+                        title="Delete Subreddit"
+                      >
+                        🗑
+                        <span className="delete-tooltip">Delete</span>
+                      </span>
+                    </>
+                  )}
                 </button>
               );
             })}
@@ -248,6 +287,17 @@ function NewsList({ articles, loading }) {
                       ) : (
                         column.subreddit
                       )}
+                      <button
+                        className="delete-subreddit-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSubreddit(column.source, column.subreddit);
+                        }}
+                        title="Delete Subreddit"
+                      >
+                        🗑
+                        <span className="delete-tooltip">Delete</span>
+                      </button>
                     </span>
                   )}
                 </div>

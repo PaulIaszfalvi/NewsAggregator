@@ -67,6 +67,28 @@
   color: #667eea;
 }
 
+.delete-subreddit-btn-min {
+  margin-left: 6px;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: #ff4d4d;
+  position: relative;
+}
+
+.delete-subreddit-btn-min:hover {
+  opacity: 1;
+  background: rgba(255, 77, 77, 0.1);
+  transform: scale(1.1);
+}
+
 .minimized-column-btn strong {
   font-weight: 600;
 }
@@ -183,6 +205,66 @@
 .column-subheader a:hover {
   opacity: 1;
   text-decoration: underline;
+}
+
+.delete-subreddit-btn {
+  background: none;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px;
+  margin-left: 8px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.delete-subreddit-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 2px rgba(255, 77, 77, 0.5));
+}
+
+.delete-tooltip {
+  visibility: hidden;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px 8px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-weight: normal;
+}
+
+.delete-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.delete-subreddit-btn:hover .delete-tooltip,
+.delete-subreddit-btn-min:hover .delete-tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 
 .column-articles {
