@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import NewsList from './components/NewsList';
 import NewsFilter from './components/NewsFilter';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -12,8 +12,20 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedSource, setSelectedSource] = useState('all');
   const [limit, setLimit] = useState(50);
+  const [abortController, setAbortController] = useState(null);
+  const [showNSFWPopup, setShowNSFWPopup] = useState(false);
+  const [nsfwSubreddit, setNsfwSubreddit] = useState('');
+  const nsfwTimeoutRef = useRef(null);
 
   const fetchNews = async (source = 'all', itemLimit = 50) => {
+    if (abortController) {
+      abortController.abort();
+    }
+
+    const newController = new AbortController();
+    setAbortController(newController);
+    const signal = newController.signal;
+
     setLoading(true);
     setError(null);
     
@@ -22,7 +34,7 @@ function App() {
         ? `${API_BASE}/api/news?limit=${itemLimit}`
         : `${API_BASE}/api/news/${source}?limit=${itemLimit}`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal });
       
       if (!response.ok) {
         throw new Error(`API error: ${response.statusText}`);
@@ -35,6 +47,7 @@ function App() {
       setArticles([]);
 
       while (true) {
+        if (signal.aborted) break;
         const { done, value } = await reader.read();
         if (done) break;
 
@@ -43,10 +56,25 @@ function App() {
         buffer = lines[lines.length - 1];
 
         for (let i = 0; i < lines.length - 1; i++) {
+          if (signal.aborted) break;
           if (lines[i].trim()) {
             try {
               const section = JSON.parse(lines[i]);
-              setArticles(prev => [...prev, section]);
+              if (section.isNSFW) {
+                setNsfwSubreddit(section.subreddit);
+                setShowNSFWPopup(true);
+                
+                if (nsfwTimeoutRef.current) {
+                  clearTimeout(nsfwTimeoutRef.current);
+                }
+                
+                nsfwTimeoutRef.current = setTimeout(() => {
+                  setShowNSFWPopup(false);
+                  nsfwTimeoutRef.current = null;
+                }, 3000);
+              } else {
+                setArticles(prev => [...prev, section]);
+              }
             } catch (e) {
               console.warn('Failed to parse line:', lines[i]);
             }
@@ -54,10 +82,16 @@ function App() {
         }
       }
     } catch (err) {
-      setError(err.message);
-      console.error('Error fetching news:', err);
+      if (err.name === 'AbortError') {
+        console.log('Fetch aborted');
+      } else {
+        setError(err.message);
+        console.error('Error fetching news:', err);
+      }
     } finally {
-      setLoading(false);
+      if (!signal.aborted) {
+        setLoading(false);
+      }
     }
   };
 
@@ -86,6 +120,11 @@ function App() {
         </header>
         
         <main className="App-main">
+          {showNSFWPopup && (
+            <div className="nsfw-popup">
+              NSFW subs are not allowed
+            </div>
+          )}
           <NewsFilter
             selectedSource={selectedSource}
             limit={limit}

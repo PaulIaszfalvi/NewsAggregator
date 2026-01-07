@@ -42,6 +42,13 @@ class RedditScraper {
       const json = await response.json();
       const children = json.data?.children || [];
 
+      // Check for NSFW content
+      const isNSFW = children.some(item => item.data?.over_18 === true);
+      if (isNSFW) {
+        logger.warn(`NSFW content detected in r/${this.subreddit}`);
+        throw new Error('NSFW subs are not allowed');
+      }
+
       const articles = [];
 
       for (const item of children) {

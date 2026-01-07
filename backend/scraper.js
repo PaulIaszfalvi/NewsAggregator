@@ -29,7 +29,7 @@ class Scraper {
     const validSub = subreddit?.trim();
     const cacheKey = `${siteName}:${validSub}`;
 
-    if (!validSub) {
+    if (!validSub && siteName !== 'ycombinator') {
       logger.warn(`Skipping empty subreddit for ${linkConfig.title}`, { source: siteName });
       return null;
     }
@@ -56,13 +56,18 @@ class Scraper {
       ]);
 
       const seenUrls = new Set();
+      const seenTitles = new Set();
       const deduplicatedArticles = articles.filter(article => {
-        const url = article.url || 'NO_URL';
-        if (seenUrls.has(url)) {
-          logger.debug(`Duplicate found: ${url}`);
+        const url = (article.url || 'NO_URL').trim();
+        const title = (article.title || 'NO_TITLE').trim().toLowerCase();
+        
+        if (seenUrls.has(url) || seenTitles.has(title)) {
+          logger.debug(`Duplicate found: ${url} | ${title}`);
           return false;
         }
+        
         seenUrls.add(url);
+        seenTitles.add(title);
         return true;
       });
 
@@ -116,9 +121,23 @@ class Scraper {
       }
 
       for (const subreddit of linkConfig.subs) {
-        const result = await this._scrapeSource(linkConfig, subreddit, template, numResults);
-        if (result) {
-          yield result;
+        try {
+          const result = await this._scrapeSource(linkConfig, subreddit, template, numResults);
+          if (result) {
+            yield result;
+          }
+        } catch (error) {
+          if (error.message === 'NSFW subs are not allowed') {
+            yield {
+              source: linkConfig.title,
+              subreddit,
+              error: 'NSFW subs are not allowed',
+              isNSFW: true,
+              articles: [],
+            };
+          } else {
+            logger.error(`Error in scrapeAllStream for ${linkConfig.title}/${subreddit}: ${error.message}`);
+          }
         }
       }
     }
@@ -151,9 +170,23 @@ class Scraper {
     const results = [];
 
     for (const sub of linkConfig.subs) {
-      const result = await this._scrapeSource(linkConfig, sub, template, numResults);
-      if (result) {
-        results.push(result);
+      try {
+        const result = await this._scrapeSource(linkConfig, sub, template, numResults);
+        if (result) {
+          results.push(result);
+        }
+      } catch (error) {
+        if (error.message === 'NSFW subs are not allowed') {
+          results.push({
+            source: linkConfig.title,
+            subreddit: sub,
+            error: 'NSFW subs are not allowed',
+            isNSFW: true,
+            articles: [],
+          });
+        } else {
+          logger.error(`Error in scrapeBySource for ${linkConfig.title}/${sub}: ${error.message}`);
+        }
       }
     }
 

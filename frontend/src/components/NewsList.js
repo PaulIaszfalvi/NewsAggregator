@@ -65,14 +65,21 @@ function NewsList({ articles, loading, onRefresh }) {
           source: section.source,
           subreddit: section.subreddit,
           articles: [],
+          seenArticles: new Set(),
         };
       }
       if (Array.isArray(section.articles)) {
-        groupedBySubreddit[key].articles.push(...section.articles);
+        section.articles.forEach(article => {
+          const articleKey = `${article.url || 'NO_URL'}|${(article.title || '').trim().toLowerCase()}`;
+          if (!groupedBySubreddit[key].seenArticles.has(articleKey)) {
+            groupedBySubreddit[key].articles.push(article);
+            groupedBySubreddit[key].seenArticles.add(articleKey);
+          }
+        });
       }
     });
 
-    const columnsWithSortedArticles = Object.values(groupedBySubreddit).map((column) => ({
+    const columnsWithSortedArticles = Object.values(groupedBySubreddit).map(({ seenArticles, ...column }) => ({
       ...column,
       articles: column.articles.sort((a, b) => (b.score || 0) - (a.score || 0)),
     }));
@@ -227,17 +234,19 @@ function NewsList({ articles, loading, onRefresh }) {
                   {column.subreddit && (
                     <>
                       <span className="minimized-column-subreddit">{column.subreddit}</span>
-                      <span
-                        className="delete-subreddit-btn-min"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSubreddit(column.source, column.subreddit);
-                        }}
-                        title="Delete Subreddit"
-                      >
-                        🗑
-                        <span className="delete-tooltip">Delete</span>
-                      </span>
+                      {column.subreddit !== 'main' && (
+                        <span
+                          className="delete-subreddit-btn-min"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSubreddit(column.source, column.subreddit);
+                          }}
+                          title="Delete Subreddit"
+                        >
+                          🗑
+                          <span className="delete-tooltip">Delete</span>
+                        </span>
+                      )}
                     </>
                   )}
                 </button>
@@ -287,17 +296,19 @@ function NewsList({ articles, loading, onRefresh }) {
                       ) : (
                         column.subreddit
                       )}
-                      <button
-                        className="delete-subreddit-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSubreddit(column.source, column.subreddit);
-                        }}
-                        title="Delete Subreddit"
-                      >
-                        🗑
-                        <span className="delete-tooltip">Delete</span>
-                      </button>
+                      {column.subreddit !== 'main' && (
+                        <button
+                          className="delete-subreddit-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSubreddit(column.source, column.subreddit);
+                          }}
+                          title="Delete Subreddit"
+                        >
+                          🗑
+                          <span className="delete-tooltip">Delete</span>
+                        </button>
+                      )}
                     </span>
                   )}
                 </div>

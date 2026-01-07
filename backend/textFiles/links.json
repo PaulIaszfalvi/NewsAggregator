@@ -12,14 +12,13 @@
         "weightroom",
         "powerlifting",
         "python",
-        "floridar4r",
         "pembrokepines"
       ]
     },
     {
       "title": "ycombinator",
       "main": "https://news.ycombinator.com",
-      "subs": []
+      "subs": ["main"]
     }
   ]
 }
