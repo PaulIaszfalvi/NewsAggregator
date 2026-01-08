@@ -1,5 +1,5 @@
 const reddit = require('./templates/reddit');
-const ycombinator = require('./templates/ycombinator');
+const hackernews = require('./templates/hackernews');
 const logger = require('./utils/logger');
 const config = require('./config');
 const cache = require('./utils/cache');
@@ -9,7 +9,7 @@ class Scraper {
   constructor() {
     this.templates = {
       reddit,
-      ycombinator,
+      'hacker news': hackernews,
     };
     this.linksConfig = this._loadConfig();
   }
@@ -29,7 +29,7 @@ class Scraper {
     const validSub = subreddit?.trim();
     const cacheKey = `${siteName}:${validSub}`;
 
-    if (!validSub && siteName !== 'ycombinator') {
+    if (!validSub && siteName !== 'hacker news') {
       logger.warn(`Skipping empty subreddit for ${linkConfig.title}`, { source: siteName });
       return null;
     }

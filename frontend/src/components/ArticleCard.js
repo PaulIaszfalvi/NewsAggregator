@@ -14,6 +14,7 @@ function ArticleCard({ article, compact = false }) {
     author = 'Unknown',
     score = 0,
     url = '#',
+    commentsUrl = '#',
     source = 'Unknown',
     subreddit = '',
   } = article;
@@ -21,6 +22,18 @@ function ArticleCard({ article, compact = false }) {
   const safeUrl = typeof url === 'string' && url.startsWith('http')
     ? url
     : '#';
+
+  const safeCommentsUrl = typeof commentsUrl === 'string' && commentsUrl.startsWith('http')
+    ? commentsUrl
+    : safeUrl;
+
+  const handleCardClick = (e) => {
+    // If clicking a link (like the title), don't trigger card click
+    if (e.target.tagName === 'A' || e.target.closest('a')) {
+      return;
+    }
+    window.open(safeCommentsUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const calculatePreviewPosition = (e) => {
     if (!cardRef) return { top: 0, left: 0 };
@@ -91,11 +104,12 @@ function ArticleCard({ article, compact = false }) {
   if (compact) {
     return (
       <div
-        className="article-card compact"
+        className="article-card compact clickable-card"
         ref={setCardRef}
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onClick={handleCardClick}
       >
         <h4 className="article-title-compact">
           <a href={safeUrl} target="_blank" rel="noopener noreferrer" title={title}>
@@ -120,11 +134,12 @@ function ArticleCard({ article, compact = false }) {
 
   return (
     <div
-      className="article-card"
+      className="article-card clickable-card"
       ref={setCardRef}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={handleCardClick}
     >
       <div className="article-header">
         <div className="article-meta">

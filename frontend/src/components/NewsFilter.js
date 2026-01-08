@@ -20,7 +20,7 @@ function NewsFilter({
   const sources = [
     { value: 'all', label: 'All Sources' },
     { value: 'reddit', label: 'Reddit' },
-    { value: 'ycombinator', label: 'Hacker News' },
+    { value: 'hacker news', label: 'Hacker News' },
   ];
 
   const limits = [10, 20, 30, 50, 100];

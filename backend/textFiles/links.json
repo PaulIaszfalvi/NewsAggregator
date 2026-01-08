@@ -16,7 +16,7 @@
       ]
     },
     {
-      "title": "ycombinator",
+      "title": "hacker news",
       "main": "https://news.ycombinator.com",
       "subs": ["main"]
     }

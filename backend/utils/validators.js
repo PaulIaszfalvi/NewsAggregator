@@ -1,6 +1,6 @@
 const validators = {
   isValidSite: (site) => {
-    return ['reddit', 'ycombinator'].includes(site?.toLowerCase());
+    return ['reddit', 'hacker news'].includes(site?.toLowerCase());
   },
 
   isValidNumber: (num, min = 1, max = 50) => {

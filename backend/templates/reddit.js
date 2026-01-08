@@ -70,6 +70,7 @@ class RedditScraper {
           author: post.author || 'Unknown',
           score: post.score || 0,
           url: post.url?.startsWith('http') ? post.url : `https://reddit.com${post.permalink}`,
+          commentsUrl: `https://reddit.com${post.permalink}`,
           source: this.name,
           fetchedAt: new Date().toISOString(),
           body: post.selftext || '',
