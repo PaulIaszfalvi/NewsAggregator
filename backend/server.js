@@ -46,13 +46,14 @@ app.get('/api/news', async (req, res, next) => {
 app.get('/api/news/:source', async (req, res, next) => {
   try {
     const { source } = req.params;
+    const sources = source.split(',').map(s => s.trim()).filter(Boolean);
     const numResults = parseInt(req.query.limit, 10) || config.scraper.defaultResultsPerSource;
-    logger.debug(`Fetching ${source} articles`, { limit: numResults });
+    logger.debug(`Fetching articles for sources: ${sources.join(', ')}`, { limit: numResults });
     
     res.setHeader('Content-Type', 'application/x-ndjson');
     res.setHeader('Transfer-Encoding', 'chunked');
     
-    const results = await scraper.scrapeBySource(source, numResults);
+    const results = await scraper.scrapeBySources(sources, numResults);
     
     for (const section of results) {
       const flattenedSection = {

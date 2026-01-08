@@ -19,6 +19,36 @@
       "title": "hacker news",
       "main": "https://news.ycombinator.com",
       "subs": ["main"]
+    },
+    {
+      "title": "techcrunch",
+      "main": "https://techcrunch.com/feed",
+      "subs": ["main"]
+    },
+    {
+      "title": "the verge",
+      "main": "https://theverge.com/rss/index.xml",
+      "subs": ["main"]
+    },
+    {
+      "title": "ars technica",
+      "main": "https://arstechnica.com/feed",
+      "subs": ["main"]
+    },
+    {
+      "title": "wired",
+      "main": "https://wired.com/feed/rss",
+      "subs": ["main"]
+    },
+    {
+      "title": "slashdot",
+      "main": "https://slashdot.org/index.rss",
+      "subs": ["main"]
+    },
+    {
+      "title": "lobsters",
+      "main": "https://lobste.rs/rss",
+      "subs": ["main"]
     }
   ]
 }

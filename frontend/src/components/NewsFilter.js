@@ -4,7 +4,7 @@ import '../styles/NewsFilter.css';
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function NewsFilter({
-  selectedSource,
+  selectedSources = ['all'],
   limit,
   onSourceChange,
   onLimitChange,
@@ -18,9 +18,15 @@ function NewsFilter({
   const [addError, setAddError] = useState(null);
 
   const sources = [
-    { value: 'all', label: 'All Sources' },
+    { value: 'all', label: 'All' },
     { value: 'reddit', label: 'Reddit' },
     { value: 'hacker news', label: 'Hacker News' },
+    { value: 'techcrunch', label: 'TechCrunch' },
+    { value: 'the verge', label: 'The Verge' },
+    { value: 'ars technica', label: 'Ars Technica' },
+    { value: 'wired', label: 'Wired' },
+    { value: 'slashdot', label: 'Slashdot' },
+    { value: 'lobsters', label: 'Lobsters' },
   ];
 
   const limits = [10, 20, 30, 50, 100];
@@ -71,56 +77,53 @@ function NewsFilter({
 
   return (
     <div className="news-filter">
-      <div className="filter-group">
-        <label htmlFor="source-select">Source:</label>
-        <select
-          id="source-select"
-          value={selectedSource}
-          onChange={(e) => onSourceChange(e.target.value)}
-          disabled={loading}
-          className="filter-select"
-        >
-          {sources.map((source) => (
-            <option key={source.value} value={source.value}>
-              {source.label}
-            </option>
-          ))}
-        </select>
+      <div className="source-tabs">
+        {sources.map((source) => (
+          <button
+            key={source.value}
+            className={`source-tab ${selectedSources.includes(source.value) ? 'active' : ''}`}
+            onClick={() => onSourceChange(source.value)}
+            disabled={loading}
+          >
+            {source.label}
+          </button>
+        ))}
       </div>
 
-      <div className="filter-group">
-        <label htmlFor="limit-select">Results per source:</label>
-        <select
-          id="limit-select"
-          value={limit}
-          onChange={(e) => onLimitChange(parseInt(e.target.value, 10))}
+      <div className="filter-actions">
+        <div className="filter-group">
+          <label htmlFor="limit-select">Results:</label>
+          <select
+            id="limit-select"
+            value={limit}
+            onChange={(e) => onLimitChange(parseInt(e.target.value, 10))}
+            disabled={loading}
+            className="filter-select"
+          >
+            {limits.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          onClick={onRefresh}
           disabled={loading}
-          className="filter-select"
+          className="refresh-button"
         >
-          {limits.map((l) => (
-            <option key={l} value={l}>
-              {l}
-            </option>
-          ))}
-        </select>
+          {loading ? 'Loading...' : 'Refresh'}
+        </button>
+
+        <button
+          onClick={() => setShowAddSubredditModal(true)}
+          disabled={loading}
+          className="add-subreddit-button"
+        >
+          + Add Subreddit
+        </button>
       </div>
-
-      <button
-        onClick={onRefresh}
-        disabled={loading}
-        className="refresh-button"
-      >
-        {loading ? 'Loading...' : 'Refresh'}
-      </button>
-
-      <button
-        onClick={() => setShowAddSubredditModal(true)}
-        disabled={loading}
-        className="add-subreddit-button"
-      >
-        + Add Subreddit
-      </button>
-
       {showAddSubredditModal && (
         <div className="modal-overlay" onClick={() => setShowAddSubredditModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

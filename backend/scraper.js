@@ -1,5 +1,6 @@
 const reddit = require('./templates/reddit');
 const hackernews = require('./templates/hackernews');
+const RSSTemplate = require('./templates/rss');
 const logger = require('./utils/logger');
 const config = require('./config');
 const cache = require('./utils/cache');
@@ -10,6 +11,12 @@ class Scraper {
     this.templates = {
       reddit,
       'hacker news': hackernews,
+      'techcrunch': new RSSTemplate('TechCrunch'),
+      'the verge': new RSSTemplate('The Verge'),
+      'ars technica': new RSSTemplate('Ars Technica'),
+      'wired': new RSSTemplate('Wired'),
+      'slashdot': new RSSTemplate('Slashdot'),
+      'lobsters': new RSSTemplate('Lobsters'),
     };
     this.linksConfig = this._loadConfig();
   }
@@ -29,7 +36,9 @@ class Scraper {
     const validSub = subreddit?.trim();
     const cacheKey = `${siteName}:${validSub}`;
 
-    if (!validSub && siteName !== 'hacker news') {
+    const isRSS = template instanceof RSSTemplate;
+
+    if (!validSub && siteName !== 'hacker news' && !isRSS) {
       logger.warn(`Skipping empty subreddit for ${linkConfig.title}`, { source: siteName });
       return null;
     }
@@ -44,7 +53,11 @@ class Scraper {
       logger.debug(`Scraping ${linkConfig.title}/${validSub}`, { source: siteName, sub: validSub });
 
       const scrapePromise = (async () => {
-        await template.initialize(validSub);
+        if (template instanceof RSSTemplate) {
+          await template.initialize(linkConfig.main);
+        } else {
+          await template.initialize(validSub);
+        }
         return await template.getResults(numResults);
       })();
 
@@ -163,31 +176,40 @@ class Scraper {
   }
 
   async scrapeBySource(source, numResults = config.scraper.defaultResultsPerSource) {
-    const sourceLower = source?.toLowerCase();
-    const linksConfig = this._loadConfig();
-    const linkConfig = linksConfig.links.find(
-      (l) => l.title?.toLowerCase() === sourceLower
-    );
+    return this.scrapeBySources([source], numResults);
+  }
 
-    if (!linkConfig) {
-      throw new Error(`Unknown source: ${source}`);
-    }
-
-    const template = this.templates[sourceLower];
-    if (!template) {
-      throw new Error(`No scraper template for ${source}`);
-    }
-
+  async scrapeBySources(sources, numResults = config.scraper.defaultResultsPerSource) {
     const results = [];
+    const sourceList = Array.isArray(sources) ? sources : [sources];
+    
+    for (const source of sourceList) {
+      const sourceLower = source?.toLowerCase().trim();
+      const linksConfig = this._loadConfig();
+      const linkConfig = linksConfig.links.find(
+        (l) => l.title?.toLowerCase() === sourceLower
+      );
 
-    for (const sub of linkConfig.subs) {
-      try {
-        const result = await this._scrapeSource(linkConfig, sub, template, numResults);
-        if (result) {
-          results.push(result);
+      if (!linkConfig) {
+        logger.warn(`Unknown source in multi-scrape: ${source}`);
+        continue;
+      }
+
+      const template = this.templates[sourceLower];
+      if (!template) {
+        logger.warn(`No scraper template for ${source}`);
+        continue;
+      }
+
+      for (const sub of linkConfig.subs) {
+        try {
+          const result = await this._scrapeSource(linkConfig, sub, template, numResults);
+          if (result) {
+            results.push(result);
+          }
+        } catch (error) {
+          logger.error(`Error in scrapeBySources for ${linkConfig.title}/${sub}: ${error.message}`);
         }
-      } catch (error) {
-        logger.error(`Error in scrapeBySource for ${linkConfig.title}/${sub}: ${error.message}`);
       }
     }
 

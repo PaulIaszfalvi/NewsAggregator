@@ -10,14 +10,14 @@ function App() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedSource, setSelectedSource] = useState('all');
+  const [selectedSources, setSelectedSources] = useState(['all']);
   const [limit, setLimit] = useState(50);
   const [abortController, setAbortController] = useState(null);
   const [showNSFWPopup, setShowNSFWPopup] = useState(false);
   const [nsfwSubreddit, setNsfwSubreddit] = useState('');
   const nsfwTimeoutRef = useRef(null);
 
-  const fetchNews = async (source = 'all', itemLimit = 50) => {
+  const fetchNews = async (sources = ['all'], itemLimit = 50) => {
     if (abortController) {
       abortController.abort();
     }
@@ -30,9 +30,10 @@ function App() {
     setError(null);
     
     try {
-      const url = source === 'all'
+      const sourceParam = sources.join(',');
+      const url = sources.includes('all')
         ? `${API_BASE}/api/news?limit=${itemLimit}`
-        : `${API_BASE}/api/news/${source}?limit=${itemLimit}`;
+        : `${API_BASE}/api/news/${sourceParam}?limit=${itemLimit}`;
 
       const response = await fetch(url, { signal });
       
@@ -82,11 +83,24 @@ function App() {
   };
 
   useEffect(() => {
-    fetchNews(selectedSource, limit);
-  }, [selectedSource, limit]);
+    fetchNews(selectedSources, limit);
+  }, [selectedSources, limit]);
 
   const handleSourceChange = (source) => {
-    setSelectedSource(source);
+    setSelectedSources(prev => {
+      if (source === 'all') {
+        return ['all'];
+      }
+      
+      const newSources = prev.filter(s => s !== 'all');
+      
+      if (newSources.includes(source)) {
+        const filtered = newSources.filter(s => s !== source);
+        return filtered.length === 0 ? ['all'] : filtered;
+      } else {
+        return [...newSources, source];
+      }
+    });
   };
 
   const handleLimitChange = (newLimit) => {
@@ -94,7 +108,7 @@ function App() {
   };
 
   const handleRefresh = () => {
-    fetchNews(selectedSource, limit);
+    fetchNews(selectedSources, limit);
   };
 
   const triggerNSFWPopup = (subreddit) => {
@@ -126,7 +140,7 @@ function App() {
             </div>
           )}
           <NewsFilter
-            selectedSource={selectedSource}
+            selectedSources={selectedSources}
             limit={limit}
             onSourceChange={handleSourceChange}
             onLimitChange={handleLimitChange}
