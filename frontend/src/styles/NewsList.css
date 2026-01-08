@@ -15,28 +15,30 @@
 }
 
 .article-count {
-  background: white;
+  background: #1e293b;
   padding: 1rem 1.5rem;
   margin-bottom: 1.5rem;
-  color: #666;
+  color: #94a3b8;
   font-size: 0.95rem;
   font-weight: 500;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border: 1px solid #334155;
 }
 
 .minimized-columns-section {
   margin-bottom: 1.5rem;
   width: 100%;
   display: block;
-  background: white;
+  background: #1e293b;
   padding: 1rem 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   min-height: 52px;
+  border: 1px solid #334155;
 }
 
 .minimized-columns-list {
@@ -46,8 +48,8 @@
 }
 
 .minimized-column-btn {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: #334155;
+  border: 1px solid #475569;
   border-radius: 6px;
   padding: 0.5rem 1rem;
   cursor: pointer;
@@ -57,14 +59,13 @@
   align-items: center;
   gap: 0.4rem;
   white-space: nowrap;
+  color: #f1f5f9;
 }
 
-
-
 .minimized-column-btn:hover {
-  background: #f5f5f5;
-  border-color: #667eea;
-  color: #667eea;
+  background: #475569;
+  border-color: #5dade2;
+  color: #5dade2;
 }
 
 .delete-subreddit-btn-min {
@@ -116,14 +117,15 @@
 }
 
 .article-column {
-  background: white;
+  background: #1e293b;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
   cursor: grab;
+  border: 1px solid #334155;
 }
 
 .article-column:active {
@@ -142,8 +144,8 @@
 }
 
 .column-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #334155;
+  color: #f1f5f9;
   padding: 1rem;
   position: sticky;
   top: 0;
@@ -152,6 +154,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  border-bottom: 1px solid #475569;
 }
 
 .column-header.drag-handle {

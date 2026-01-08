@@ -1,14 +1,16 @@
 .App {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #0f172a; /* Dark background matching header */
+  color: #f1f5f9;
 }
 
 .App-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0f172a; /* Very dark slate */
   color: white;
   padding: 3rem 1rem;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #1e293b;
 }
 
 .App-header h1 {
