@@ -1,22 +1,21 @@
 .article-preview {
   position: fixed;
-  background: white;
+  background: #1e293b;
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid #334155;
   z-index: 1000;
   animation: slideIn 0.15s ease-out;
-  max-width: 450px;
-  max-height: 350px;
+  max-width: 550px;
   pointer-events: auto;
-  transition: all 0.1s ease-out;
-  will-change: transform, top, left;
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  will-change: transform, top, left, opacity;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
@@ -29,7 +28,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: 100vh;
+  max-height: 85vh;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -42,27 +41,27 @@
 
 .preview-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   line-height: 1.4;
-  color: #333;
+  color: #f1f5f9;
   font-weight: 600;
 }
 
 .preview-link {
   display: inline-block;
-  color: #667eea;
+  color: #5dade2;
   text-decoration: none;
   font-weight: 500;
   padding: 0.5rem 1rem;
-  background: #f0f4ff;
+  background: #334155;
   border-radius: 4px;
   transition: all 0.2s;
   text-align: center;
 }
 
 .preview-link:hover {
-  background: #667eea;
-  color: white;
+  background: #475569;
+  color: #5dade2;
 }
 
 .preview-meta {
@@ -71,7 +70,7 @@
   gap: 0.75rem;
   font-size: 0.85rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #334155;
 }
 
 .preview-source {
@@ -83,13 +82,13 @@
 }
 
 .preview-author {
-  color: #666;
+  color: #94a3b8;
   font-weight: 500;
 }
 
 .preview-score {
-  background: #f0f0f0;
-  color: #667eea;
+  background: #334155;
+  color: #5dade2;
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-weight: 600;
@@ -104,16 +103,16 @@
 
 .preview-image {
   max-width: 100%;
-  max-height: 300px;
+  height: auto;
   object-fit: contain;
   border-radius: 4px;
-  background: #f5f5f5;
+  background: #0f172a;
 }
 
 .preview-body {
-  color: #666;
+  color: #cbd5e1;
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .preview-body p {

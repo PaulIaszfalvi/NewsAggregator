@@ -40,28 +40,39 @@ function ArticleCard({ article, compact = false }) {
 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const previewWidth = 450;
-    const previewHeight = 350;
-    const gap = 12;
+    const previewWidth = 550;
+    const gap = 20;
 
     const mouseX = e.clientX;
     const mouseY = e.clientY;
 
     let left = mouseX + gap;
-    let top = mouseY + gap;
+    let position = {};
 
+    // Horizontal positioning
     if (left + previewWidth > windowWidth) {
       left = mouseX - previewWidth - gap;
     }
-
-    if (top + previewHeight > windowHeight) {
-      top = windowHeight - previewHeight - 10;
-    }
-
-    top = Math.max(10, top);
     left = Math.max(10, Math.min(left, windowWidth - previewWidth - 10));
 
-    return { top: `${top}px`, left: `${left}px` };
+    // Vertical positioning
+    if (mouseY > windowHeight * 0.6) {
+      // In lower part of screen, show above mouse
+      position = {
+        bottom: `${windowHeight - mouseY + gap}px`,
+        left: `${left}px`,
+        top: 'auto'
+      };
+    } else {
+      // In upper part of screen, show below mouse
+      position = {
+        top: `${mouseY + gap}px`,
+        left: `${left}px`,
+        bottom: 'auto'
+      };
+    }
+
+    return position;
   };
 
   const handleMouseEnter = (e) => {

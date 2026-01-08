@@ -8,6 +8,10 @@ function ArticlePreview({ article, position, onMouseEnter, onMouseLeave }) {
     body = '',
     images = [],
     url = '#',
+    author = 'Unknown',
+    score = 0,
+    source = 'Unknown',
+    subreddit = '',
   } = article;
 
   return (
@@ -18,7 +22,14 @@ function ArticlePreview({ article, position, onMouseEnter, onMouseLeave }) {
       onMouseLeave={onMouseLeave}
     >
       <div className="preview-content">
-        <h3 className="preview-title">{title}</h3>
+        <div className="preview-header">
+          <h3 className="preview-title">{title}</h3>
+          <div className="preview-meta">
+            <span className="preview-source">{source}{subreddit ? ` / r/${subreddit}` : ''}</span>
+            <span className="preview-author">By {author}</span>
+            {score > 0 && <span className="preview-score">↑ {score}</span>}
+          </div>
+        </div>
 
         {images.length > 0 && (
           <div className="preview-images">
@@ -36,7 +47,7 @@ function ArticlePreview({ article, position, onMouseEnter, onMouseLeave }) {
 
         {body && (
           <div className="preview-body">
-            <p>{body.substring(0, 300)}{body.length > 300 ? '...' : ''}</p>
+            <p>{body}</p>
           </div>
         )}
       </div>
