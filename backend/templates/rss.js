@@ -40,7 +40,7 @@ class RSSTemplate {
   _parseRSS(xml, numResults) {
     const articles = [];
     // Basic regex to find items. RSS uses <item>, Atom uses <entry>
-    const itemRegex = /<(item|entry)>([\s\S]*?)<\/\1>/g;
+    const itemRegex = /<(item|entry)\b[^>]*>([\s\S]*?)<\/\1>/g;
     let match;
     let count = 0;
 
