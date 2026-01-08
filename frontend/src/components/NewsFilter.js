@@ -9,6 +9,7 @@ function NewsFilter({
   onSourceChange,
   onLimitChange,
   onRefresh,
+  onNSFWDetected,
   loading,
 }) {
   const [showAddSubredditModal, setShowAddSubredditModal] = useState(false);
@@ -28,7 +29,8 @@ function NewsFilter({
     e.preventDefault();
     setAddError(null);
 
-    if (!newSubreddit.trim()) {
+    const subredditName = newSubreddit.trim();
+    if (!subredditName) {
       setAddError('Please enter a subreddit name');
       return;
     }
@@ -40,12 +42,20 @@ function NewsFilter({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           source: 'reddit',
-          subreddit: newSubreddit.trim(),
+          subreddit: subredditName,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (errorData.isNSFW) {
+          setShowAddSubredditModal(false);
+          setNewSubreddit('');
+          if (onNSFWDetected) {
+            onNSFWDetected(subredditName);
+          }
+          return;
+        }
         throw new Error(errorData.error || 'Failed to add subreddit');
       }
 

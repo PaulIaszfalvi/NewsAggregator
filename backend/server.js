@@ -72,7 +72,7 @@ app.get('/api/news/:source', async (req, res, next) => {
   }
 });
 
-app.post('/api/subreddits', (req, res, next) => {
+app.post('/api/subreddits', async (req, res, next) => {
   try {
     const { source, subreddit } = req.body;
 
@@ -105,6 +105,20 @@ app.post('/api/subreddits', (req, res, next) => {
         success: false,
         error: `Subreddit already exists: ${subredditTrim}`,
       });
+    }
+
+    // Check for NSFW before adding
+    if (sourceLower === 'reddit') {
+      const redditTemplate = require('./templates/reddit');
+      await redditTemplate.initialize(subredditTrim);
+      const results = await redditTemplate.getResults(10);
+      if (results && results.isNSFW) {
+        return res.status(400).json({
+          success: false,
+          error: 'NSFW subs are not allowed',
+          isNSFW: true
+        });
+      }
     }
 
     linkConfig.subs.push(subredditTrim);

@@ -48,12 +48,33 @@ class Scraper {
         return await template.getResults(numResults);
       })();
 
-      const articles = await Promise.race([
+      const articlesResult = await Promise.race([
         scrapePromise,
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Scrape timeout')), config.scraper.timeout * 2)
         ),
       ]);
+
+      let articles = [];
+      let isNSFW = false;
+
+      if (Array.isArray(articlesResult)) {
+        articles = articlesResult;
+      } else if (articlesResult && typeof articlesResult === 'object') {
+        articles = articlesResult.articles || [];
+        isNSFW = !!articlesResult.isNSFW;
+      }
+
+      if (isNSFW) {
+        return {
+          source: linkConfig.title,
+          subreddit: validSub,
+          articles: [],
+          count: 0,
+          fetchedAt: new Date().toISOString(),
+          isNSFW: true,
+        };
+      }
 
       const seenUrls = new Set();
       const seenTitles = new Set();
@@ -127,17 +148,7 @@ class Scraper {
             yield result;
           }
         } catch (error) {
-          if (error.message === 'NSFW subs are not allowed') {
-            yield {
-              source: linkConfig.title,
-              subreddit,
-              error: 'NSFW subs are not allowed',
-              isNSFW: true,
-              articles: [],
-            };
-          } else {
-            logger.error(`Error in scrapeAllStream for ${linkConfig.title}/${subreddit}: ${error.message}`);
-          }
+          logger.error(`Error in scrapeAllStream for ${linkConfig.title}/${subreddit}: ${error.message}`);
         }
       }
     }
@@ -176,17 +187,7 @@ class Scraper {
           results.push(result);
         }
       } catch (error) {
-        if (error.message === 'NSFW subs are not allowed') {
-          results.push({
-            source: linkConfig.title,
-            subreddit: sub,
-            error: 'NSFW subs are not allowed',
-            isNSFW: true,
-            articles: [],
-          });
-        } else {
-          logger.error(`Error in scrapeBySource for ${linkConfig.title}/${sub}: ${error.message}`);
-        }
+        logger.error(`Error in scrapeBySource for ${linkConfig.title}/${sub}: ${error.message}`);
       }
     }
 

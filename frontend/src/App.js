@@ -60,21 +60,7 @@ function App() {
           if (lines[i].trim()) {
             try {
               const section = JSON.parse(lines[i]);
-              if (section.isNSFW) {
-                setNsfwSubreddit(section.subreddit);
-                setShowNSFWPopup(true);
-                
-                if (nsfwTimeoutRef.current) {
-                  clearTimeout(nsfwTimeoutRef.current);
-                }
-                
-                nsfwTimeoutRef.current = setTimeout(() => {
-                  setShowNSFWPopup(false);
-                  nsfwTimeoutRef.current = null;
-                }, 3000);
-              } else {
-                setArticles(prev => [...prev, section]);
-              }
+              setArticles(prev => [...prev, section]);
             } catch (e) {
               console.warn('Failed to parse line:', lines[i]);
             }
@@ -111,6 +97,20 @@ function App() {
     fetchNews(selectedSource, limit);
   };
 
+  const triggerNSFWPopup = (subreddit) => {
+    setNsfwSubreddit(subreddit);
+    setShowNSFWPopup(true);
+    
+    if (nsfwTimeoutRef.current) {
+      clearTimeout(nsfwTimeoutRef.current);
+    }
+    
+    nsfwTimeoutRef.current = setTimeout(() => {
+      setShowNSFWPopup(false);
+      nsfwTimeoutRef.current = null;
+    }, 3000);
+  };
+
   return (
     <ErrorBoundary>
       <div className="App">
@@ -122,7 +122,7 @@ function App() {
         <main className="App-main">
           {showNSFWPopup && (
             <div className="nsfw-popup">
-              NSFW subs are not allowed
+              NSFW subs are not allowed {nsfwSubreddit && `(r/${nsfwSubreddit})`}
             </div>
           )}
           <NewsFilter
@@ -131,6 +131,7 @@ function App() {
             onSourceChange={handleSourceChange}
             onLimitChange={handleLimitChange}
             onRefresh={handleRefresh}
+            onNSFWDetected={triggerNSFWPopup}
             loading={loading}
           />
 

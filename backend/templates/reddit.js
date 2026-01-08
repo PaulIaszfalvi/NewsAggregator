@@ -42,17 +42,16 @@ class RedditScraper {
       const json = await response.json();
       const children = json.data?.children || [];
 
-      // Check for NSFW content
-      const isNSFW = children.some(item => item.data?.over_18 === true);
-      if (isNSFW) {
-        logger.warn(`NSFW content detected in r/${this.subreddit}`);
-        throw new Error('NSFW subs are not allowed');
-      }
-
       const articles = [];
+      let nsfwCount = 0;
 
       for (const item of children) {
         const post = item.data;
+
+        if (post.over_18) {
+          nsfwCount++;
+          continue;
+        }
 
         if (post.stickied) continue;
 
@@ -79,7 +78,15 @@ class RedditScraper {
       }
 
       logger.info(`Fetched ${articles.length} articles from r/${this.subreddit}`);
-      return articles;
+      
+      // A subreddit is considered NSFW if more than 50% of its top posts are NSFW
+      // or if it's completely empty but had NSFW content.
+      const isNSFW = children.length > 0 && (nsfwCount > children.length / 2 || (articles.length === 0 && nsfwCount > 0));
+
+      return { 
+        articles, 
+        isNSFW
+      };
 
     } catch (error) {
       logger.error('Failed to fetch Reddit JSON', error.message);
