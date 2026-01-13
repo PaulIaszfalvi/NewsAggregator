@@ -8,15 +8,41 @@ class HackerNewsScraper {
     this.baseUrl = 'https://news.ycombinator.com';
     this.browser = null;
     this.page = null;
+    this.userAgents = [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+    ];
   }
 
   async initialize() {
     try {
       logger.debug('Launching browser for Hacker News', { action: 'launch' });
-      this.browser = await puppeteer.launch(config.scraper.puppeteer);
-      this.page = await this.browser.newPage();
+      
+      try {
+        // Try launching with sandbox enabled first (secure default)
+        this.browser = await puppeteer.launch(config.scraper.puppeteer);
+      } catch (launchError) {
+        logger.warn('Failed to launch Puppeteer with secure defaults, retrying with --no-sandbox', { 
+          error: launchError.message 
+        });
+        
+        // Fallback to --no-sandbox if the environment requires it (e.g. some CI/Docker setups)
+        const fallbackOptions = {
+          ...config.scraper.puppeteer,
+          args: [...config.scraper.puppeteer.args, '--no-sandbox']
+        };
+        this.browser = await puppeteer.launch(fallbackOptions);
+      }
 
-      logger.debug('Navigating to Hacker News', { url: this.baseUrl });
+      this.page = await this.browser.newPage();
+      
+      // Rotate User-Agent
+      const randomUA = this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
+      await this.page.setUserAgent(randomUA);
+
+      logger.debug('Navigating to Hacker News', { url: this.baseUrl, ua: randomUA });
       await this.page.goto(this.baseUrl, {
         waitUntil: 'networkidle2',
         timeout: config.scraper.timeout,

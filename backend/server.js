@@ -7,8 +7,11 @@ const path = require('path');
 const config = require('./config');
 const logger = require('./utils/logger');
 const scraper = require('./scraper');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+const apiLimiter = rateLimit(config.rateLimit);
 
 if (fs.existsSync(config.paths.favicon)) {
   app.use(favicon(config.paths.favicon));
@@ -17,7 +20,20 @@ app.use(cors(config.cors));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/api/news', async (req, res, next) => {
+// API Key Protection Middleware
+const validateApiKey = (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+  if (config.apiKey && apiKey !== config.apiKey) {
+    logger.warn('Unauthorized API access attempt', { ip: req.ip });
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized: Invalid API Key',
+    });
+  }
+  next();
+};
+
+app.get('/api/news', validateApiKey, apiLimiter, async (req, res, next) => {
   try {
     const numResults = parseInt(req.query.limit, 10) || config.scraper.defaultResultsPerSource;
     logger.debug('Fetching news articles', { limit: numResults });
@@ -43,7 +59,7 @@ app.get('/api/news', async (req, res, next) => {
   }
 });
 
-app.get('/api/news/:source', async (req, res, next) => {
+app.get('/api/news/:source', validateApiKey, apiLimiter, async (req, res, next) => {
   try {
     const { source } = req.params;
     const sources = source.split(',').map(s => s.trim()).filter(Boolean);
@@ -73,7 +89,7 @@ app.get('/api/news/:source', async (req, res, next) => {
   }
 });
 
-app.post('/api/subreddits', async (req, res, next) => {
+app.post('/api/subreddits', validateApiKey, async (req, res, next) => {
   try {
     const { source, subreddit } = req.body;
 
@@ -142,7 +158,7 @@ app.post('/api/subreddits', async (req, res, next) => {
   }
 });
 
-app.delete('/api/subreddits', (req, res, next) => {
+app.delete('/api/subreddits', validateApiKey, (req, res, next) => {
   try {
     const { source, subreddit } = req.body;
 
@@ -198,7 +214,7 @@ app.delete('/api/subreddits', (req, res, next) => {
   }
 });
 
-app.get('/api/subreddits', (req, res, next) => {
+app.get('/api/subreddits', validateApiKey, (req, res, next) => {
   try {
     const linksConfigPath = config.paths.linksConfig;
     const linksConfig = JSON.parse(fs.readFileSync(linksConfigPath, 'utf-8'));
@@ -209,7 +225,7 @@ app.get('/api/subreddits', (req, res, next) => {
   }
 });
 
-app.post('/api/cache/clear', (req, res) => {
+app.post('/api/cache/clear', validateApiKey, (req, res) => {
   scraper.clearCache();
   res.json({ success: true, message: 'Cache cleared' });
 });
